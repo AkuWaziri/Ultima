@@ -661,3 +661,56 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .asset-logo span{width:31px;height:31px;border-radius:50%;font-size:23px;background:#2775ca;color:#fff;box-shadow:inset 0 0 0 2px #ffffff35}
 .asset-logo-eurc span{background:#2455b8;color:#fff}
 @media(max-width:700px){.asset-logo span{width:29px;height:29px;font-size:22px}}
+
+
+/* AI strategy analyst */
+.ai-strategy-panel{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  gap:16px;
+  margin:24px 0;
+  padding:22px;
+  border:1px solid #d4c5fa;
+  border-radius:20px;
+  background:linear-gradient(125deg,#f0eaff 0%,#faf8ff 62%,#edf4ff 100%);
+  box-shadow:0 8px 24px #4532740a;
+}
+.ai-panel-visual{
+  display:grid;
+  place-items:center;
+  width:46px;
+  height:46px;
+  border-radius:15px;
+  color:#fff;
+  background:linear-gradient(145deg,#7958e7,#5232c5);
+  box-shadow:0 5px 14px #6545d52b;
+}
+.ai-panel-main{min-width:0}
+.ai-panel-main .eyebrow{font-size:10px;font-weight:800;letter-spacing:1.15px}
+.ai-panel-main h2{margin:5px 0 6px;color:#292542;font-size:23px;letter-spacing:-.65px}
+.ai-panel-main>p{max-width:760px;margin:0;color:#625d7b;font-size:13px;line-height:1.65}
+.ai-panel-controls{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-top:18px}
+.ai-panel-controls label{display:grid;gap:7px;min-width:150px;color:#625d7b;font-size:11px;font-weight:750}
+.ai-panel-controls select{
+  min-height:42px;min-width:150px;padding:0 34px 0 12px;border:1px solid #d9d0ee;border-radius:11px;
+  background:#fff;color:#292542;font:inherit;font-size:13px;outline-offset:2px
+}
+.ai-analyze-button{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 16px;
+  border:1px solid #5637c6;border-radius:11px;background:#6545d5;color:#fff;font-size:12px;font-weight:750;
+  box-shadow:0 4px 10px #6545d522;transition:background .18s ease,transform .18s ease
+}
+.ai-analyze-button:hover:not(:disabled){background:#4f30bd;transform:translateY(-1px)}
+.ai-safety-note{display:flex;align-items:flex-start;gap:7px;margin-top:15px;color:#665d82;font-size:11px;line-height:1.5}
+.ai-safety-note svg{flex:0 0 auto;color:#6545d5;margin-top:1px}
+.ai-result{white-space:pre-wrap;margin-top:14px;padding:15px 16px;border:1px solid #dcd3f3;border-radius:13px;background:#fff;color:#494363;font-size:13px;line-height:1.7;overflow-wrap:anywhere}
+.ai-result-error{border-color:#f0c5be;background:#fff8f6;color:#8d382d}
+@media(max-width:700px){
+  .ai-strategy-panel{grid-template-columns:36px minmax(0,1fr);gap:11px;padding:16px;margin:18px 0;border-radius:16px}
+  .ai-panel-visual{width:36px;height:36px;border-radius:12px}
+  .ai-panel-visual svg{width:18px}
+  .ai-panel-main h2{font-size:20px}
+  .ai-panel-controls{align-items:stretch;gap:10px}
+  .ai-panel-controls label,.ai-panel-controls select{width:100%;min-width:0}
+  .ai-analyze-button{width:100%}
+}
