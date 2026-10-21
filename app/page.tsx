@@ -205,7 +205,7 @@ export default function Home() {
 
 function StrategyCard({ vault, onExplore }: { vault: (typeof vaults)[number]; onExplore: () => void }) {
   return (
-    <article className="strategy-card">
+    <article className={`strategy-card strategy-card-${vault.tone}`}>
       <div className="strategy-card-top">
         <div className={`protocol-logo ${vault.tone}`}>{vault.initials}<span className="protocol-spark">✦</span></div>
         <div className="strategy-title"><h3>{vault.name}</h3><span>{vault.provider}</span></div>
