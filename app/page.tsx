@@ -117,7 +117,7 @@ export default function Home() {
                 <div>
                   
                   <h1>Make your money<br className="mobile-break" /> <span>work smarter.</span></h1>
-                  <p className="welcome-subtitle">A clearer way to explore stablecoin yield on Arc.</p>
+                  <p className="welcome-subtitle">A clearer, smarter way to explore stablecoin yields on Arc.</p>
                 </div>
                 <div className="welcome-art" aria-hidden="true">
                   <div className="orbit orbit-one" /><div className="orbit orbit-two" />
@@ -194,7 +194,16 @@ export default function Home() {
             </>
           )}
 
-          <footer className="page-footer"><span>© 2026 Ultima</span><span><span className="footer-dot" /> Arc Mainnet · Chain ID 5042</span><span>Built for clarity, not guesswork.</span></footer>
+          <footer className="page-footer">
+            <div className="footer-brand"><div className="brand-mark footer-brand-mark"><span>u</span><i /></div><strong>ultima</strong><span>© 2026</span></div>
+            <span className="footer-tagline">Built for clarity, smarter.</span>
+            <div className="footer-socials" aria-label="Social platforms">
+              <a className="footer-social footer-x" href="https://x.com" target="_blank" rel="noreferrer" aria-label="X (Twitter)" title="X (Twitter)">𝕏</a>
+              <a className="footer-social" href="https://telegram.org" target="_blank" rel="noreferrer" aria-label="Telegram" title="Telegram">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 4.2 18.4 19c-.24 1.05-.86 1.3-1.74.8l-4.82-3.55-2.33 2.24c-.26.26-.48.48-.98.48l.35-4.9 8.92-8.06c.39-.35-.08-.54-.6-.19L6.18 12.7 1.5 11.24c-1.02-.32-1.04-1.02.22-1.52L20 2.65c.84-.31 1.58.2 1.3 1.55Z" fill="currentColor"/></svg>
+              </a>
+            </div>
+          </footer>
         </div>
       </section>
 
