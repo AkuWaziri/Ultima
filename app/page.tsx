@@ -109,7 +109,7 @@ export default function Home() {
       {mobileOpen && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
       <aside className={`sidebar ${mobileOpen ? "sidebar-open" : ""}`}>
         <div className="brand-row">
-          <div className="brand-mark" aria-label="Ultima logo"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path className="paper-u" d="M6.5 5.5h5.2v13.1c0 3.5 1.5 5.5 4.3 5.5s4.3-2 4.3-5.5V5.5h5.2v13.7c0 6.3-3.6 9.8-9.5 9.8s-9.5-3.5-9.5-9.8V5.5Z"/><path className="paper-fold" d="M20.3 5.5h5.2v5.2z"/><path className="paper-crease" d="M20.4 5.7v5h5" /></svg></div>
+          <div className="brand-mark" aria-label="Ultima logo"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path className="paper-u" d="M6.5 5.5h5.2v13.1c0 3.5 1.5 5.5 4.3 5.5s4.3-2 4.3-5.5V5.5h5.2v13.7c0 6.3-3.6 9.8-9.5 9.8s-9.5-3.5-9.5-9.8V5.5Z"/><circle className="u-red-dot" cx="25.5" cy="6.3" r="3.1"/></svg></div>
           <span className="brand-name">ultima</span>
           <button className="icon-button mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close menu"><X size={18} /></button>
         </div>
@@ -238,7 +238,7 @@ export default function Home() {
           )}
 
           <footer className="page-footer">
-            <div className="footer-brand"><div className="brand-mark footer-brand-mark" aria-label="Ultima logo"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path className="paper-u" d="M6.5 5.5h5.2v13.1c0 3.5 1.5 5.5 4.3 5.5s4.3-2 4.3-5.5V5.5h5.2v13.7c0 6.3-3.6 9.8-9.5 9.8s-9.5-3.5-9.5-9.8V5.5Z"/><path className="paper-fold" d="M20.3 5.5h5.2v5.2z"/><path className="paper-crease" d="M20.4 5.7v5h5" /></svg></div><strong>ultima</strong><span>© 2026</span></div>
+            <div className="footer-brand"><div className="brand-mark footer-brand-mark" aria-label="Ultima logo"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path className="paper-u" d="M6.5 5.5h5.2v13.1c0 3.5 1.5 5.5 4.3 5.5s4.3-2 4.3-5.5V5.5h5.2v13.7c0 6.3-3.6 9.8-9.5 9.8s-9.5-3.5-9.5-9.8V5.5Z"/><circle className="u-red-dot" cx="25.5" cy="6.3" r="3.1"/></svg></div><strong>ultima</strong><span>© 2026</span></div>
             <span className="footer-tagline">Built for clarity, smarter.</span>
             <div className="footer-socials" aria-label="Social platforms">
               <a className="footer-social footer-x" href="https://x.com" target="_blank" rel="noreferrer" aria-label="X (Twitter)" title="X (Twitter)">𝕏</a>
