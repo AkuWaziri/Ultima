@@ -586,3 +586,21 @@ button:disabled{cursor:not-allowed;opacity:.58}
   border-color:rgba(255,255,255,.28);
   color:#fff;
 }
+
+
+/* All selected workspace tabs use one uniform light-purple shade */
+.nav-item.active,
+.nav-item.active:hover,
+.nav-item.active:focus-visible{
+  background:#e4dcff !important;
+  background-image:none !important;
+  color:#5138bd !important;
+  border-color:#e4dcff !important;
+  box-shadow:none !important;
+}
+.nav-item.active svg{color:#5138bd !important}
+.nav-item.active .nav-count{
+  background:#e4dcff !important;
+  border-color:#e4dcff !important;
+  color:#5138bd !important;
+}
