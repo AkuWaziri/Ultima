@@ -236,3 +236,27 @@ body {
 .strategy-card-blue .card-more:hover{background:#e7f1ff;color:#2868bd}
 .strategy-card-violet:hover{border-color:#cbbaff;box-shadow:0 12px 25px #7657e815}
 .strategy-card-blue:hover{border-color:#b8d5ff;box-shadow:0 12px 25px #397bd815}
+
+
+/* Footer identity and social marks */
+.welcome-row h1{font-size:39px;font-weight:800;letter-spacing:-1.65px}
+.welcome-subtitle{font-size:13.5px}
+.page-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.footer-brand{display:flex;align-items:center;gap:9px;color:#8b8ca4;font-size:11px}
+.footer-brand strong{font-family:'Manrope',sans-serif;color:#302d4b;font-size:14px;font-weight:800;letter-spacing:-.45px}
+.footer-brand>span{margin-left:2px;color:#a4a4b7}
+.footer-brand-mark{width:25px;height:25px;border-radius:8px;box-shadow:none}
+.footer-brand-mark span{font-size:19px}
+.footer-brand-mark i{width:5px;height:5px}
+.footer-tagline{margin-left:auto;font-size:11px;font-weight:700;color:#74738e}
+.footer-socials{display:flex;align-items:center;gap:8px}
+.footer-social{display:grid;place-items:center;width:31px;height:31px;border:1px solid #e9e6f4;border-radius:10px;background:#fff;color:#7160c7;text-decoration:none;transition:background .18s,color .18s,transform .18s}
+.footer-social svg{width:16px;height:16px}
+.footer-social:hover{background:#f0edff;color:#5f45d3;transform:translateY(-1px)}
+.footer-x{font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#27243a}
+@media(max-width:760px){
+  .welcome-row h1{font-size:34px;letter-spacing:-1.35px}
+  .page-footer{justify-content:space-between;gap:13px}
+  .footer-tagline{margin-left:0;order:3;width:100%}
+  .footer-socials{margin-left:auto}
+}
