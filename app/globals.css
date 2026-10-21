@@ -484,22 +484,22 @@ button:disabled{cursor:not-allowed;opacity:.58}
 }
 
 
-/* Monochrome folded-paper Ultima mark */
+/* Minimal Ultima U mark with vivid red accent */
 .brand-mark{
   width:34px;
   height:34px;
   flex:0 0 34px;
-  border-radius:10px;
-  background:#171717;
-  box-shadow:0 4px 10px #1717171a;
-  overflow:hidden;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
 }
-.brand-mark svg{width:29px;height:29px;display:block}
-.brand-mark .paper-u{fill:#fff}
-.brand-mark .paper-fold{fill:#171717}
-.brand-mark .paper-crease{fill:none;stroke:#fff;stroke-width:.9;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.brand-mark svg{width:29px;height:29px;display:block;overflow:visible}
+.brand-mark .paper-u{fill:#171717}
+.brand-mark .u-red-dot{fill:#ff2038;stroke:#fff;stroke-width:1}
+.brand-mark .paper-fold,.brand-mark .paper-crease{display:none}
 .brand-mark i{display:none}
-.footer-brand-mark{width:27px;height:27px;flex-basis:27px;border-radius:8px;box-shadow:none}
+.footer-brand-mark{width:27px;height:27px;flex-basis:27px;border-radius:0;box-shadow:none}
 .footer-brand-mark svg{width:23px;height:23px}
 
 
