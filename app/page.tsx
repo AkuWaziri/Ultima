@@ -143,7 +143,7 @@ export default function Home() {
       <section className="main-area">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="icon-button mobile-menu" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={21} /></button>
+            
             <div className="mobile-brand" aria-label="Ultima"><div className="brand-mark"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path className="paper-u" d="M6.5 5.5h5.2v13.1c0 3.5 1.5 5.5 4.3 5.5s4.3-2 4.3-5.5V5.5h5.2v13.7c0 6.3-3.6 9.8-9.5 9.8s-9.5-3.5-9.5-9.8V5.5Z"/><circle className="u-red-dot" cx="25.5" cy="6.3" r="3.1"/></svg></div><span className="brand-name">ultima</span></div>
             <div className="breadcrumb">Workspace <span>/</span> <strong>{section}</strong></div>
           </div>
@@ -151,6 +151,7 @@ export default function Home() {
             <div className="network-chip"><span className="network-dot" /> Arc Mainnet</div>
             <button className="icon-button notification-button" aria-label="Notification settings" title="Notification settings" onClick={openNotificationSettings}><Bell size={18} /><i /></button>
             <button className="connect-button" onClick={connectWallet}><Wallet size={16} /> {connected ? "Wallet connected" : "Connect wallet"}</button>
+            <button className="icon-button mobile-menu" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={21} /></button>
           </div>
         </header>
 
