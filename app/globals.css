@@ -604,3 +604,18 @@ button:disabled{cursor:not-allowed;opacity:.58}
   border-color:#e4dcff !important;
   color:#5138bd !important;
 }
+
+
+/* Tighten the hero copy and lift the following content to match */
+.welcome-row{
+  min-height:148px;
+  padding-top:0;
+  padding-bottom:12px;
+  margin-top:-8px;
+}
+.metrics-grid{margin-top:0}
+@media(min-width:1500px){.welcome-row{min-height:164px}}
+@media(max-width:960px){.welcome-row{margin-top:-5px}}
+@media(max-width:700px){
+  .welcome-row{padding-bottom:14px;margin-top:-4px}
+}
