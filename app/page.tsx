@@ -192,19 +192,19 @@ export default function Home() {
 
               <section className="section-block">
                 <div className="section-heading">
-                  <div><h2>Explore strategies</h2><p>Start with USDC. More assets are on the way.</p></div>
+                  <div><h2>Explore strategies</h2><p>Explore stablecoin strategies for USDC and EURC on Arc.</p></div>
                   <button className="text-link" onClick={() => navigate("Strategies")}>View all strategies <ArrowRight size={16} /></button>
                 </div>
                 <div className="asset-switch" role="group" aria-label="Choose asset">
                   <button className={asset === "USDC" ? "asset-tab selected" : "asset-tab"} onClick={() => setAsset("USDC")}><span className="token token-usdc">$</span> USDC <span className="asset-live">START HERE</span></button>
-                  <button className="asset-tab disabled" onClick={() => { setAsset("EURC"); setNotice("EURC support is planned after the USDC flow is verified."); window.setTimeout(() => setNotice(""), 3500); }}><span className="token token-eurc">€</span> EURC <span className="soon-pill">Soon</span></button>
+                  <button className={asset === "EURC" ? "asset-tab selected" : "asset-tab"} onClick={() => setAsset("EURC")}><span className="token token-eurc">€</span> EURC</button>
                 </div>
                 <div className="strategy-grid">
-                  {vaults.slice(0, 2).map((vault) => (
+                  {vaults.filter((vault) => vault.tags[0] === asset).map((vault) => (
                     <StrategyCard key={vault.name} vault={vault} onExplore={() => navigate("Strategies")} />
                   ))}
                 </div>
-                <div className="data-note"><ShieldCheck size={16} /><span>Rates and vault safety checks will be shown only after live onchain verification. No estimated APY is presented as current.</span></div>
+                {vaults.some((vault) => vault.tags[0] === asset) ? <div className="data-note"><ShieldCheck size={16} /><span>Rates and vault safety checks will be shown only after live onchain verification. No estimated APY is presented as current.</span></div> : <div className="empty-state asset-empty"><div className="empty-icon"><Landmark size={20} /></div><strong>No {asset} strategies listed yet</strong><p>{asset} is supported by Ultima. Verified vault options will appear here once their onchain details are confirmed.</p></div>}
               </section>
 
             </>
