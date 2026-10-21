@@ -46,6 +46,49 @@ export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [search, setSearch] = useState("");
+  const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
+  const [notificationEmail, setNotificationEmail] = useState("");
+  const [notificationTelegram, setNotificationTelegram] = useState("");
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    positionUpdates: true,
+    transactionUpdates: true,
+    riskAlerts: true,
+    productUpdates: false,
+  });
+  const [notificationSaved, setNotificationSaved] = useState(false);
+
+  const openNotificationSettings = () => {
+    try {
+      const saved = window.localStorage.getItem("ultima-notification-settings");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setNotificationEmail(parsed.email || "");
+        setNotificationTelegram(parsed.telegram || "");
+        setNotificationPrefs({
+          positionUpdates: parsed.preferences?.positionUpdates ?? true,
+          transactionUpdates: parsed.preferences?.transactionUpdates ?? true,
+          riskAlerts: parsed.preferences?.riskAlerts ?? true,
+          productUpdates: parsed.preferences?.productUpdates ?? false,
+        });
+      }
+    } catch {
+      // Keep the current form values if saved settings cannot be read.
+    }
+    setNotificationSaved(false);
+    setNotificationSettingsOpen(true);
+  };
+
+  const saveNotificationSettings = () => {
+    const settings = {
+      email: notificationEmail.trim(),
+      telegram: notificationTelegram.trim().replace(/^@/, ""),
+      preferences: notificationPrefs,
+    };
+    window.localStorage.setItem("ultima-notification-settings", JSON.stringify(settings));
+    setNotificationTelegram(settings.telegram);
+    setNotificationSaved(true);
+    window.setTimeout(() => setNotificationSaved(false), 3500);
+  };
 
   const connectWallet = () => {
     setNotice("Wallet connection is the next integration step. No wallet has been connected.");
@@ -105,7 +148,7 @@ export default function Home() {
           </div>
           <div className="topbar-actions">
             <div className="network-chip"><span className="network-dot" /> Arc Mainnet</div>
-            <button className="icon-button notification-button" aria-label="Notifications" onClick={() => setNotice("You’re all caught up. Alerts will appear here once enabled.")}><Bell size={18} /><i /></button>
+            <button className="icon-button notification-button" aria-label="Notification settings" title="Notification settings" onClick={openNotificationSettings}><Bell size={18} /><i /></button>
             <button className="connect-button" onClick={connectWallet}><Wallet size={16} /> {connected ? "Wallet connected" : "Connect wallet"}</button>
           </div>
         </header>
@@ -206,6 +249,49 @@ export default function Home() {
           </footer>
         </div>
       </section>
+
+      {notificationSettingsOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setNotificationSettingsOpen(false);
+        }}>
+          <section className="notification-modal" role="dialog" aria-modal="true" aria-labelledby="notification-title">
+            <div className="notification-modal-head">
+              <div className="notification-modal-icon"><Bell size={19} /></div>
+              <button className="icon-button" aria-label="Close notification settings" onClick={() => setNotificationSettingsOpen(false)}><X size={18} /></button>
+            </div>
+            <h2 id="notification-title">Notification settings</h2>
+            <p className="notification-intro">Choose where Ultima should contact you and which updates matter.</p>
+            <label className="notification-field">
+              <span>Email address</span>
+              <input type="email" autoComplete="email" placeholder="you@example.com" value={notificationEmail} onChange={(event) => setNotificationEmail(event.target.value)} />
+            </label>
+            <label className="notification-field">
+              <span>Telegram username</span>
+              <div className="telegram-input"><span>@</span><input autoComplete="off" placeholder="yourusername" value={notificationTelegram} onChange={(event) => setNotificationTelegram(event.target.value.replace(/^@/, ""))} /></div>
+              <small>Enter your username without the @. A Telegram bot connection will be required to deliver messages.</small>
+            </label>
+            <div className="notification-options-title">Send me updates about</div>
+            <div className="notification-options">
+              {([
+                ["positionUpdates", "Position updates", "Changes to your strategy positions."],
+                ["transactionUpdates", "Transactions", "Deposit, withdrawal and transaction status."],
+                ["riskAlerts", "Risk alerts", "Important strategy or position warnings."],
+                ["productUpdates", "Product updates", "New strategies and Ultima announcements."],
+              ] as const).map(([key, label, description]) => (
+                <label className="notification-option" key={key}>
+                  <span><strong>{label}</strong><small>{description}</small></span>
+                  <input type="checkbox" checked={notificationPrefs[key]} onChange={(event) => setNotificationPrefs((current) => ({ ...current, [key]: event.target.checked }))} />
+                </label>
+              ))}
+            </div>
+            <div className="notification-modal-footer">
+              <span className="notification-disclaimer">Preferences are saved in this browser. Delivery is not connected yet.</span>
+              <button className="connect-button" onClick={saveNotificationSettings}>Save preferences</button>
+            </div>
+            {notificationSaved && <div className="notification-saved" role="status"><CircleCheck size={15} /> Preferences saved on this device.</div>}
+          </section>
+        </div>
+      )}
 
       {notice && <div className="toast" role="status"><CircleCheck size={17} /><span>{notice}</span><button aria-label="Dismiss notification" onClick={() => setNotice("")}><X size={15} /></button></div>}
     </main>
