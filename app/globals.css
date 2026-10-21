@@ -501,3 +501,73 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .brand-mark i{display:none}
 .footer-brand-mark{width:27px;height:27px;flex-basis:27px;border-radius:8px;box-shadow:none}
 .footer-brand-mark svg{width:23px;height:23px}
+
+
+/* Deeper vault and asset-tab colours */
+.asset-tab{
+  background:#eee8ff;
+  border-color:#d1c2fb;
+  color:#4d35b8;
+}
+.asset-tab.selected{
+  background:#6545d5;
+  border-color:#5435c4;
+  color:#fff;
+  box-shadow:0 4px 12px #6545d52b;
+}
+.asset-tab.selected .token-usdc{
+  background:#fff;
+  color:#5635c5;
+}
+.asset-tab.selected .asset-live{
+  background:#d9ceff;
+  color:#4325a8;
+}
+.asset-tab.disabled{
+  background:#e3ecff;
+  border-color:#b8cef7;
+  color:#234f9b;
+}
+.asset-tab.disabled .token-eurc{
+  background:#315fae;
+  color:#fff;
+}
+.asset-tab.disabled .soon-pill{
+  background:#cbdcff;
+  color:#244e91;
+}
+.strategy-card-violet{
+  background:linear-gradient(145deg,#e0d4ff 0%,#eee7ff 100%);
+  border-color:#bba6f6;
+}
+.strategy-card-violet .protocol-logo{
+  background:linear-gradient(145deg,#7953e6,#5634c8);
+  color:#fff;
+}
+.strategy-card-violet .explore-button{
+  background:#6545d5;
+  color:#fff;
+}
+.strategy-card-violet .explore-button:hover{background:#4f30bd}
+.strategy-card-blue{
+  background:linear-gradient(145deg,#d5e5ff 0%,#e8efff 100%);
+  border-color:#a9c5f5;
+}
+.strategy-card-blue .protocol-logo{
+  background:linear-gradient(145deg,#397bd8,#2055ad);
+  color:#fff;
+}
+.strategy-card-blue .explore-button{
+  background:#285fb8;
+  color:#fff;
+}
+.strategy-card-blue .explore-button:hover{background:#1d4d9e}
+.strategy-card-violet .strategy-details,
+.strategy-card-blue .strategy-details{
+  border-color:color-mix(in srgb,var(--vault-border) 45%,#8c79c8);
+}
+.strategy-card-violet .tag{background:#d1c2fa;color:#4930a6}
+.strategy-card-blue .tag{background:#c9dcff;color:#234e97}
+@media(max-width:700px){
+  .asset-tab.selected{box-shadow:0 3px 9px #6545d522}
+}
