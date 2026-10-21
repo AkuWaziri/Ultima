@@ -291,3 +291,194 @@ body {
 .notification-modal-footer .connect-button{flex-shrink:0}
 .notification-saved{display:flex;align-items:center;gap:7px;margin-top:14px;padding:10px 12px;border-radius:9px;background:#eafaf3;color:#218767;font-size:11px;font-weight:700}
 @media(max-width:520px){.modal-backdrop{padding:10px;align-items:end}.notification-modal{padding:20px 17px;border-radius:20px 20px 14px 14px;max-height:92vh}.notification-modal h2{font-size:21px}.notification-modal-footer{align-items:stretch;flex-direction:column}.notification-disclaimer{max-width:none}.notification-modal-footer .connect-button{width:100%}}
+
+
+/* Ultima visual refinement — colour, contrast, hierarchy and responsive polish */
+:root{
+  --ink:#292542;
+  --muted:#716e89;
+  --line:#e2daf5;
+  --paper:#f5f1ff;
+  --purple:#7455e8;
+  --purple-dark:#5b3dd0;
+  --lavender:#eee7ff;
+  --mint:#ddf7ec;
+  --green:#187c61;
+  --navy:#292344;
+}
+body{background:var(--paper);color:var(--ink)}
+.sidebar{
+  background:#eee7ff;
+  border-right-color:#ded4f5;
+}
+.brand-row{padding-bottom:27px}
+.network-pill{
+  background:#f7f3ff;
+  border-color:#dcd1f4;
+  color:#51476f;
+}
+.nav-label{color:#777092}
+.nav-item{color:#625d7c}
+.nav-item:hover{background:#e5dcff;color:#5238c8}
+.nav-item.active{
+  background:#dcd0ff;
+  color:#4f34c5;
+  box-shadow:inset 3px 0 0 #7455e8;
+}
+.nav-count{background:#f8f5ff;border-color:#d7c9ff;color:#5f43d5}
+.help-card{
+  background:linear-gradient(145deg,#e2d8ff,#f4efff);
+  border-color:#d8cbfb;
+}
+.help-card p{color:#6f688a}
+.sidebar-foot{border-top-color:#dcd3f0}
+.avatar{background:#d9ceff;color:#563bc9}
+.main-area{background:#f7f4ff}
+.topbar{
+  background:#f9f7ff;
+  border-bottom-color:#e2daf5;
+}
+.breadcrumb{color:#77738f}
+.breadcrumb strong{color:#3e385e}
+.network-chip{
+  background:#f1ecff;
+  border-color:#ded4f7;
+  color:#51476f;
+}
+.icon-button{color:#696383}
+.icon-button:hover{background:#eae2ff;color:#5238c8}
+.connect-button{
+  background:#292344;
+  box-shadow:0 5px 13px #29234420;
+}
+.connect-button:hover{background:#44376d}
+.page-content{padding-top:37px}
+.welcome-subtitle{color:#716e89}
+.eyebrow{color:#6547d4}
+.orbit{border-color:#dcd1fa}
+.orbit-two{border-color:#cfc0f8}
+.metrics-grid{gap:15px}
+.metric-card{
+  background:#f9f7ff;
+  border-color:#e2daf5;
+  box-shadow:0 5px 18px #45327408;
+}
+.balance-card{
+  background:linear-gradient(118deg,#e8e0ff 0%,#f1ebff 64%,#f9f7ff 100%);
+  border-color:#d9cdf9;
+}
+.metric-top{color:#625d7d}
+.metric-value{color:#292542}
+.metric-value .zero{color:#8f88a8}
+.metric-foot{color:#716e89}
+.subtle-pill{background:#eee9fb;color:#6c6587}
+.metric-icon.mint{background:#ddf7ec;color:#187c61}
+.metric-icon.peach{background:#ffeadf;color:#b75c34}
+.section-heading p,.panel-heading p{color:#716e89}
+.text-link,.small-text-link{color:#6547d4}
+.text-link:hover,.small-text-link:hover{color:#4e32c5}
+.asset-tab{
+  background:#f9f7ff;
+  border-color:#e2daf5;
+  color:#625d7d;
+}
+.asset-tab.selected{
+  border-color:#c8b8fb;
+  background:#e9e0ff;
+  color:#4e32c5;
+}
+.token-usdc{background:#dcd2ff;color:#5437c8}
+.token-eurc{background:#dce8ff;color:#315ea9}
+.asset-live{background:#d9ceff;color:#5238c8}
+.soon-pill{background:#ece8f6;color:#706b86}
+.strategy-card{
+  background:linear-gradient(145deg,#fdfcff 0%,#f5f1ff 100%);
+  border-color:#ded6f1;
+  box-shadow:0 4px 16px #45327408;
+}
+.strategy-card-violet{
+  background:linear-gradient(145deg,#f4efff 0%,#eee7ff 100%);
+  border-color:#d8cafb;
+}
+.strategy-card-blue{
+  background:linear-gradient(145deg,#eff5ff 0%,#e8efff 100%);
+  border-color:#cfddfa;
+}
+.strategy-card:hover{
+  border-color:#b9a7f5;
+  box-shadow:0 13px 28px #5140a116;
+}
+.strategy-title span{color:#716e89}
+.card-more{background:#faf8ff;border-color:#ded6f1;color:#716b8b}
+.card-more:hover{background:#e4dbff;color:#4f34c5}
+.strategy-description{color:#625d7b}
+.strategy-details{border-color:#dfd7ef}
+.detail-label{color:#716b87}
+.strategy-details strong{color:#433d60}
+.strategy-details .apy-pending{color:#665d82}
+.tag{color:#5f5879;background:#e9e4f5}
+.verify-tag{color:#645b83}
+.explore-button{background:#dcd0ff;color:#4f34c5}
+.explore-button:hover{background:#cfc0ff}
+.data-note{
+  border-color:#d9cff5;
+  background:#eee8ff;
+  color:#625b81;
+}
+.data-note svg{color:#6245d6}
+.bottom-grid{gap:15px}
+.panel{
+  border-color:#ded6f1;
+  background:#f9f7ff;
+  box-shadow:0 4px 16px #45327407;
+}
+.empty-icon{background:#e9e1ff;color:#6a4dde}
+.empty-state p{color:#716e89}
+.network-stat{border-color:#e2daf5}
+.network-stat-icon{background:#d9f5e9;color:#187c61}
+.network-stat span{color:#716e89}
+.status-live{color:#176f56!important;background:#dff6eb}
+.network-footer{color:#716e89}
+.page-footer{border-top-color:#e2daf5;color:#716e89}
+.subpage-heading p{color:#716e89}
+.search-box,.filter-pill{
+  background:#f9f7ff;
+  border-color:#ded6f1;
+  color:#625d7b;
+}
+.search-box input{color:#292542}
+.search-box input::placeholder{color:#8d87a6}
+.large-empty{background:#f9f7ff;border:1px solid #ded6f1;border-radius:18px}
+.empty-illustration{background:#e5dcff;color:#6547d4}
+.empty-illustration span{border-color:#f9f7ff}
+.table-head{background:#eee8ff;border-bottom-color:#ded6f1;color:#716b87}
+.toast{background:#292344;box-shadow:0 15px 40px #29234435}
+button,a,input{ -webkit-tap-highlight-color:transparent }
+button:focus-visible,input:focus-visible,a:focus-visible{
+  outline:3px solid #9b83f4;
+  outline-offset:3px;
+}
+button:disabled{cursor:not-allowed;opacity:.58}
+@media(max-width:960px){
+  .sidebar{background:#eee7ff;border-right-color:#d8cdf1}
+  .sidebar-open{box-shadow:15px 0 45px #29234424}
+}
+@media(max-width:700px){
+  .page-content{padding-top:25px}
+  .welcome-row{gap:8px}
+  .welcome-art{opacity:.9}
+  .metrics-grid{gap:10px}
+  .metric-card{border-radius:14px}
+  .strategy-card{border-radius:15px}
+  .page-footer{border-top-color:#e2daf5}
+}
+@media(max-width:390px){
+  .notification-button{display:grid}
+  .topbar-actions{gap:5px}
+  .connect-button{padding:9px 8px}
+  .connect-button svg{width:13px}
+  .breadcrumb{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
