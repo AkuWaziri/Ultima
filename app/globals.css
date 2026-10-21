@@ -209,3 +209,30 @@ body {
     background: linear-gradient(145deg, #faf8ff 0%, #f6f2ff 48%, #faf8ff 100%);
   }
 }
+
+
+/* Distinct visual identity for each vault card */
+.strategy-card-violet{
+  --vault-accent:#7657e8;
+  --vault-tint:#f5f1ff;
+  --vault-border:#e6ddff;
+  border-color:var(--vault-border);
+  background:linear-gradient(145deg,var(--vault-tint) 0%,#fff 48%);
+}
+.strategy-card-blue{
+  --vault-accent:#397bd8;
+  --vault-tint:#eff6ff;
+  --vault-border:#d8e8ff;
+  border-color:var(--vault-border);
+  background:linear-gradient(145deg,var(--vault-tint) 0%,#fff 48%);
+}
+.strategy-card-violet .strategy-details,
+.strategy-card-blue .strategy-details{border-color:color-mix(in srgb,var(--vault-border) 65%,white)}
+.strategy-card-violet .explore-button{background:#e9e0ff;color:#6545d5}
+.strategy-card-violet .explore-button:hover{background:#ded1ff}
+.strategy-card-blue .explore-button{background:#e1efff;color:#2868bd}
+.strategy-card-blue .explore-button:hover{background:#d1e5ff}
+.strategy-card-violet .card-more:hover{background:#eee7ff;color:#6545d5}
+.strategy-card-blue .card-more:hover{background:#e7f1ff;color:#2868bd}
+.strategy-card-violet:hover{border-color:#cbbaff;box-shadow:0 12px 25px #7657e815}
+.strategy-card-blue:hover{border-color:#b8d5ff;box-shadow:0 12px 25px #397bd815}
