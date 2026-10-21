@@ -115,7 +115,7 @@ export default function Home() {
             <>
               <div className="welcome-row">
                 <div>
-                  <div className="eyebrow"><Sparkles size={14} /> YOUR STABLECOIN WORKSPACE</div>
+                  
                   <h1>Make your money<br className="mobile-break" /> <span>work smarter.</span></h1>
                   <p className="welcome-subtitle">A clearer way to explore stablecoin yield on Arc.</p>
                 </div>
@@ -162,17 +162,6 @@ export default function Home() {
                 <div className="data-note"><ShieldCheck size={16} /><span>Rates and vault safety checks will be shown only after live onchain verification. No estimated APY is presented as current.</span></div>
               </section>
 
-              <section className="bottom-grid">
-                <div className="panel activity-panel">
-                  <div className="panel-heading"><div><h2>Recent activity</h2><p>Your onchain activity at a glance</p></div><button className="small-text-link" onClick={() => navigate("Activity")}>See all <ArrowRight size={14} /></button></div>
-                  <div className="empty-state compact-empty"><div className="empty-icon"><Clock3 size={20} /></div><div><strong>Nothing here yet</strong><p>Your deposits and withdrawals will show up here.</p></div></div>
-                </div>
-                <div className="panel network-panel">
-                  <div className="panel-heading"><div><h2>Built for Arc</h2><p>Fast, stablecoin-native infrastructure</p></div><div className="arc-symbol">a</div></div>
-                  <div className="network-stat"><div className="network-stat-icon"><Zap size={17} /></div><div><strong>Arc Mainnet</strong><span>Chain ID 5042</span></div><span className="status-live"><i /> Network selected</span></div>
-                  <div className="network-footer"><span>Designed for USDC-first strategies</span><ArrowUpRight size={15} /></div>
-                </div>
-              </section>
             </>
           )}
 
