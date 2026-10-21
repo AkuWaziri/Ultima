@@ -571,3 +571,18 @@ button:disabled{cursor:not-allowed;opacity:.58}
 @media(max-width:700px){
   .asset-tab.selected{box-shadow:0 3px 9px #6545d522}
 }
+
+
+/* Menu selection: one solid shade per active tab, no split-tone stripe */
+.nav-item.active{
+  background:var(--tab-color,#6547d4);
+  color:#fff;
+  border-color:var(--tab-color,#6547d4);
+  box-shadow:none;
+}
+.nav-item.active svg{color:#fff}
+.nav-item.active .nav-count{
+  background:rgba(255,255,255,.18);
+  border-color:rgba(255,255,255,.28);
+  color:#fff;
+}
