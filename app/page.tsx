@@ -125,6 +125,7 @@ export default function Home() {
   };
 
   const filteredVaults = vaults.filter((vault) =>
+    vault.tags[0] === asset &&
     (vault.name + " " + vault.provider).toLowerCase().includes(search.toLowerCase())
   );
 
@@ -237,7 +238,7 @@ export default function Home() {
           {section === "Strategies" && (
             <>
               <div className="subpage-heading"><div className="eyebrow"><Compass size={14} /> DISCOVER</div><h1>Find your <span>next strategy.</span></h1><p>Compare verified opportunities before you put funds to work.</p></div>
-              <div className="strategy-toolbar"><div className="search-box"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search strategies" aria-label="Search strategies" /></div><div className="filter-pill"><SlidersHorizontal size={15} /> USDC on Arc <ChevronDown size={14} /></div></div>
+              <div className="strategy-toolbar"><div className="search-box"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search strategies" aria-label="Search strategies" /></div><div className="filter-pill"><SlidersHorizontal size={15} /> {asset} on Arc <ChevronDown size={14} /></div></div>
               <section className="ai-strategy-panel" aria-labelledby="ai-strategy-title">
                 <div className="ai-panel-visual"><Sparkles size={22} /></div>
                 <div className="ai-panel-main">
@@ -270,7 +271,7 @@ export default function Home() {
               <div className="strategy-grid full-strategy-grid">
                 {filteredVaults.map((vault) => <StrategyCard key={vault.name} vault={vault} onExplore={() => setNotice("Live vault verification and deposit integration are the next build step.")} />)}
               </div>
-              {filteredVaults.length === 0 && <div className="empty-state"><div className="empty-icon"><Search size={20} /></div><strong>No strategies found</strong><p>Try a different name.</p></div>}
+              {filteredVaults.length === 0 && <div className="empty-state"><div className="empty-icon"><Search size={20} /></div><strong>{asset === "EURC" ? "No EURC strategies listed yet" : "No strategies found"}</strong><p>{asset === "EURC" ? "EURC is supported in Ultima. Strategy options will appear after eligible Arc vaults are verified." : "Try a different name."}</p></div>}
               <div className="data-note"><ShieldCheck size={16} /><span>These are candidate integrations, not live yield offers. Rates, liquidity, vault permissions and contract details must be verified before deposits are enabled.</span></div>
             </>
           )}
