@@ -144,6 +144,7 @@ export default function Home() {
         <header className="topbar">
           <div className="topbar-left">
             <button className="icon-button mobile-menu" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={21} /></button>
+            <div className="mobile-brand" aria-label="Ultima"><div className="brand-mark"><svg viewBox="0 0 32 32" role="img" aria-hidden="true"><path className="paper-u" d="M6.5 5.5h5.2v13.1c0 3.5 1.5 5.5 4.3 5.5s4.3-2 4.3-5.5V5.5h5.2v13.7c0 6.3-3.6 9.8-9.5 9.8s-9.5-3.5-9.5-9.8V5.5Z"/><circle className="u-red-dot" cx="25.5" cy="6.3" r="3.1"/></svg></div><span className="brand-name">ultima</span></div>
             <div className="breadcrumb">Workspace <span>/</span> <strong>{section}</strong></div>
           </div>
           <div className="topbar-actions">
@@ -160,7 +161,7 @@ export default function Home() {
                 <div>
                   
                   <h1>Make your money<br className="mobile-break" /> <span>work smarter.</span></h1>
-                  <p className="welcome-subtitle">A clearer, smarter way to explore stablecoin yields on Arc.</p>
+                  
                 </div>
                 <div className="welcome-art" aria-hidden="true">
                   <div className="orbit orbit-one" /><div className="orbit orbit-two" />
@@ -302,12 +303,8 @@ function StrategyCard({ vault, onExplore }: { vault: (typeof vaults)[number]; on
   return (
     <article className={`strategy-card strategy-card-${vault.tone}`}>
       <div className="strategy-card-top">
-        <div className={`protocol-logo ${vault.tone} protocol-logo-image`} aria-label={`${vault.name} logo`}>
-          <img
-            src={vault.tone === "violet" ? "https://res.cloudinary.com/brandpad/image/upload/c_scale%2Cf_auto%2Cw_200/v1/16085/2_galaxy_logomark" : "https://keyrock.com/favicon.ico"}
-            alt={`${vault.name} logo`}
-            loading="lazy"
-          />
+        <div className={`protocol-logo ${vault.tone} asset-logo ${vault.tags[0] === "EURC" ? "asset-logo-eurc" : "asset-logo-usdc"}`} aria-label={`${vault.tags[0] === "EURC" ? "EURC euro" : "USDC"} token logo`}>
+          <span aria-hidden="true">{vault.tags[0] === "EURC" ? "€" : "$"}</span>
         </div>
         <div className="strategy-title"><h3>{vault.name}</h3><span>{vault.provider}</span></div>
         <button className="card-more" aria-label={`More about ${vault.name}`} onClick={onExplore}><ArrowUpRight size={17} /></button>
