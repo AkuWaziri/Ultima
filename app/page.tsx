@@ -302,7 +302,13 @@ function StrategyCard({ vault, onExplore }: { vault: (typeof vaults)[number]; on
   return (
     <article className={`strategy-card strategy-card-${vault.tone}`}>
       <div className="strategy-card-top">
-        <div className={`protocol-logo ${vault.tone}`}>{vault.initials}<span className="protocol-spark">✦</span></div>
+        <div className={`protocol-logo ${vault.tone} protocol-logo-image`} aria-label={`${vault.name} logo`}>
+          <img
+            src={vault.tone === "violet" ? "https://res.cloudinary.com/brandpad/image/upload/c_scale%2Cf_auto%2Cw_200/v1/16085/2_galaxy_logomark" : "https://keyrock.com/favicon.ico"}
+            alt={`${vault.name} logo`}
+            loading="lazy"
+          />
+        </div>
         <div className="strategy-title"><h3>{vault.name}</h3><span>{vault.provider}</span></div>
         <button className="card-more" aria-label={`More about ${vault.name}`} onClick={onExplore}><ArrowUpRight size={17} /></button>
       </div>
