@@ -56,6 +56,10 @@ export default function Home() {
     productUpdates: false,
   });
   const [notificationSaved, setNotificationSaved] = useState(false);
+  const [riskPreference, setRiskPreference] = useState<"conservative" | "balanced" | "growth">("balanced");
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState("");
+  const [analysisError, setAnalysisError] = useState("");
 
   const openNotificationSettings = () => {
     try {
@@ -88,6 +92,26 @@ export default function Home() {
     setNotificationTelegram(settings.telegram);
     setNotificationSaved(true);
     window.setTimeout(() => setNotificationSaved(false), 3500);
+  };
+
+  const runStrategyAnalysis = async () => {
+    setAnalysisLoading(true);
+    setAnalysisError("");
+    setAnalysisResult("");
+    try {
+      const response = await fetch("/api/strategy-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asset, riskPreference }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Strategy analysis is temporarily unavailable.");
+      setAnalysisResult(payload.analysis);
+    } catch (error) {
+      setAnalysisError(error instanceof Error ? error.message : "Could not run strategy analysis.");
+    } finally {
+      setAnalysisLoading(false);
+    }
   };
 
   const connectWallet = () => {
@@ -214,6 +238,35 @@ export default function Home() {
             <>
               <div className="subpage-heading"><div className="eyebrow"><Compass size={14} /> DISCOVER</div><h1>Find your <span>next strategy.</span></h1><p>Compare verified opportunities before you put funds to work.</p></div>
               <div className="strategy-toolbar"><div className="search-box"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search strategies" aria-label="Search strategies" /></div><div className="filter-pill"><SlidersHorizontal size={15} /> USDC on Arc <ChevronDown size={14} /></div></div>
+              <section className="ai-strategy-panel" aria-labelledby="ai-strategy-title">
+                <div className="ai-panel-visual"><Sparkles size={22} /></div>
+                <div className="ai-panel-main">
+                  <div className="eyebrow">ULTIMA INTELLIGENCE</div>
+                  <h2 id="ai-strategy-title">AI strategy analyst</h2>
+                  <p>Compare the trade-offs for USDC or EURC strategies on Arc, based on the information currently available. This does not execute transactions.</p>
+                  <div className="ai-panel-controls">
+                    <label>Asset
+                      <select value={asset} onChange={(event) => { setAsset(event.target.value as "USDC" | "EURC"); setAnalysisResult(""); setAnalysisError(""); }}>
+                        <option value="USDC">USDC</option>
+                        <option value="EURC">EURC</option>
+                      </select>
+                    </label>
+                    <label>Risk preference
+                      <select value={riskPreference} onChange={(event) => { setRiskPreference(event.target.value as "conservative" | "balanced" | "growth"); setAnalysisResult(""); setAnalysisError(""); }}>
+                        <option value="conservative">Conservative</option>
+                        <option value="balanced">Balanced</option>
+                        <option value="growth">Growth-oriented</option>
+                      </select>
+                    </label>
+                    <button className="ai-analyze-button" onClick={runStrategyAnalysis} disabled={analysisLoading}>
+                      <Sparkles size={16} /> {analysisLoading ? "Analyzing…" : "Analyze strategies"}
+                    </button>
+                  </div>
+                  <div className="ai-safety-note"><ShieldCheck size={15} /> Candidate integrations only. Live APY, liquidity, audits and contract details are not yet verified.</div>
+                  {analysisError && <div className="ai-result ai-result-error" role="alert">{analysisError}</div>}
+                  {analysisResult && <div className="ai-result" role="status">{analysisResult}</div>}
+                </div>
+              </section>
               <div className="strategy-grid full-strategy-grid">
                 {filteredVaults.map((vault) => <StrategyCard key={vault.name} vault={vault} onExplore={() => setNotice("Live vault verification and deposit integration are the next build step.")} />)}
               </div>
