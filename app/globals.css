@@ -482,3 +482,22 @@ button:disabled{cursor:not-allowed;opacity:.58}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Monochrome folded-paper Ultima mark */
+.brand-mark{
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border-radius:10px;
+  background:#171717;
+  box-shadow:0 4px 10px #1717171a;
+  overflow:hidden;
+}
+.brand-mark svg{width:29px;height:29px;display:block}
+.brand-mark .paper-u{fill:#fff}
+.brand-mark .paper-fold{fill:#171717}
+.brand-mark .paper-crease{fill:none;stroke:#fff;stroke-width:.9;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.brand-mark i{display:none}
+.footer-brand-mark{width:27px;height:27px;flex-basis:27px;border-radius:8px;box-shadow:none}
+.footer-brand-mark svg{width:23px;height:23px}
