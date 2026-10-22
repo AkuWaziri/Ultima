@@ -8,11 +8,12 @@ import {
   Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal
 } from "lucide-react";
 
-type Section = "Overview" | "Strategies" | "My positions" | "Activity";
+type Section = "Dashboard" | "Explore" | "Strategies" | "My positions" | "Activity";
 
 const navItems: { label: Section; icon: typeof LayoutDashboard }[] = [
-  { label: "Overview", icon: LayoutDashboard },
-  { label: "Strategies", icon: Compass },
+  { label: "Dashboard", icon: LayoutDashboard },
+  { label: "Explore", icon: Compass },
+  { label: "Strategies", icon: Bot },
   { label: "My positions", icon: Wallet },
   { label: "Activity", icon: Activity },
 ];
@@ -39,7 +40,7 @@ const vaults = [
 ];
 
 export default function Home() {
-  const [section, setSection] = useState<Section>("Overview");
+  const [section, setSection] = useState<Section>("Dashboard");
   const [asset, setAsset] = useState<"USDC" | "EURC">("USDC");
   const [connected, setConnected] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
@@ -182,7 +183,7 @@ export default function Home() {
         </header>
 
         <div className="page-content">
-          {section === "Overview" && (
+          {section === "Dashboard" && (
             <>
               <div className="welcome-row">
                 <div>
@@ -216,6 +217,13 @@ export default function Home() {
                 </div>
               </div>
 
+
+            </>
+          )}
+
+          {section === "Explore" && (
+            <>
+              <div className="subpage-heading"><div className="eyebrow"><Compass size={14} /> EXPLORE</div><h1>Explore <span>strategies.</span></h1><p>Explore stablecoin strategies for USDC and EURC on Arc.</p></div>
               <section className="section-block">
                 <div className="section-heading">
                   <div><h2>Explore strategies</h2><p>Explore stablecoin strategies for USDC and EURC on Arc.</p></div>
@@ -238,7 +246,7 @@ export default function Home() {
 
           {section === "Strategies" && (
             <>
-              <div className="subpage-heading"><div className="eyebrow"><Compass size={14} /> DISCOVER</div><h1>Find your <span>next strategy.</span></h1><p>Compare verified opportunities before you put funds to work.</p></div>
+              <div className="subpage-heading"><div className="eyebrow"><Bot size={14} /> INTELLIGENCE</div><h1>Strategy <span>analyst.</span></h1><p>Compare risk trade-offs with Ultima Intelligence before making a decision.</p></div>
               <div className="strategy-toolbar"><div className="search-box"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search strategies" aria-label="Search strategies" /></div><div className="filter-pill"><SlidersHorizontal size={15} /> {asset} on Arc <ChevronDown size={14} /></div></div>
               <section className="ai-strategy-panel" aria-labelledby="ai-strategy-title">
                 <div className="ai-panel-visual"><Bot size={24} /></div>
