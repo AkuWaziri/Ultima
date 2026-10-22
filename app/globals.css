@@ -979,3 +979,11 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .vault-detail-note{margin:15px 0;color:#73748f;font-size:12px;line-height:1.65}
 .live-vault-apy small{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:5px;color:#777b99;font-size:10px;font-weight:600}
 @media(max-width:640px){.vault-detail-card{padding:16px;border-radius:16px}.vault-detail-top h4{font-size:18px}.vault-address-line{align-items:flex-start;flex-wrap:wrap}.vault-address-line code{flex-basis:100%;order:3;white-space:normal;overflow-wrap:anywhere}.vault-detail-metrics strong{font-size:18px}.live-vault-apy small{font-size:9px}}
+
+
+.vault-wallet-balance{display:flex;align-items:center;gap:12px;margin:14px 0 4px;padding:13px 15px;border:1px solid #e7e5f3;border-radius:13px;background:#fff}
+.vault-wallet-balance>span{color:var(--muted);font-size:12px}
+.vault-wallet-balance>strong{margin-left:auto;font-size:13px;color:#343052;text-align:right}
+.vault-wallet-balance>button{border:1px solid #dcd6f6;border-radius:9px;padding:7px 11px;background:#f4f0ff;color:#5b42a8;font-size:11px;font-weight:750;white-space:nowrap}
+.vault-wallet-balance>button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:540px){.vault-wallet-balance{flex-wrap:wrap;gap:8px}.vault-wallet-balance>strong{margin-left:auto}.vault-wallet-balance>span{flex:1}.vault-wallet-balance>button{margin-left:auto}}
