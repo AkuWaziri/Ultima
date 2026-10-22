@@ -506,7 +506,6 @@ export default function Home() {
                   {swapStatus && <p className="swap-notice" role="status"><ShieldCheck size={15} /> {swapStatus}</p>}
                   <p className="swap-notice"><ShieldCheck size={15} /> Testnet only. Review the wallet request carefully. Swap availability depends on live routing and liquidity; no rate is guaranteed before submission.</p>
                 </div>
-                <aside className="swap-side-note"><div className="swap-side-icon"><ShieldCheck size={20} /></div><h3>Built for stablecoins on Arc</h3><p>Swap supports the two directions: USDC to EURC and EURC to USDC. A live price, slippage estimate, token balances and transaction confirmation will appear once a verified route is integrated.</p><div className="swap-side-pair"><span className="swap-coin usdc">$</span><ArrowRight size={15} /><span className="swap-coin eurc">€</span><strong>USDC ↔ EURC</strong></div></aside>
               </section>
             </>
           )}
