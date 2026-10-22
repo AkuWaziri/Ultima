@@ -943,7 +943,7 @@ button:disabled{cursor:not-allowed;opacity:.58}
 
 /* Explore asset selectors presented as distinct vault cards */
 .vault-asset-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 14px}
-.vault-asset-cards .asset-tab{display:flex;align-items:center;gap:10px;min-height:58px;padding:9px 12px;border:1px solid transparent;border-radius:13px;text-align:left;box-shadow:0 4px 12px rgba(30,35,70,.045);transition:box-shadow .18s ease,border-color .18s ease}
+.vault-asset-cards .asset-tab{display:flex;align-items:center;gap:10px;width:100%;min-width:0;height:58px;min-height:58px;padding:9px 12px;border:1px solid transparent;border-radius:13px;text-align:left;box-shadow:0 4px 12px rgba(30,35,70,.045);transition:box-shadow .18s ease,border-color .18s ease}
 .vault-asset-cards .asset-tab:hover{box-shadow:0 7px 16px rgba(30,35,70,.08)}
 .vault-asset-cards .asset-tab.token-usdc{background:linear-gradient(135deg,#edf5ff 0%,#dceaff 100%);border-color:#b9d5ff;color:#174d8b}
 .vault-asset-cards .asset-tab.token-eurc{background:linear-gradient(135deg,#eafbf3 0%,#d4f5e6 100%);border-color:#a8e4c9;color:#12674f}
@@ -955,7 +955,7 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .vault-card-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
 .vault-card-label strong{font-size:13px;font-weight:750}
 .vault-card-label small{font-size:10px;opacity:.78;font-weight:500}
-@media(max-width:600px){.vault-asset-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.vault-asset-cards .asset-tab{min-height:54px;padding:8px 9px;border-radius:12px;gap:7px}.vault-card-label strong{font-size:12px}.vault-card-label small{font-size:9px}.vault-asset-cards .asset-tab .token{width:28px;height:28px;flex-basis:28px;font-size:15px;border-radius:9px}}
+@media(max-width:600px){.vault-asset-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.vault-asset-cards .asset-tab{width:100%;height:54px;min-height:54px;padding:8px 9px;border-radius:12px;gap:7px}.vault-card-label strong{font-size:12px}.vault-card-label small{font-size:9px}.vault-asset-cards .asset-tab .token{width:28px;height:28px;flex-basis:28px;font-size:15px;border-radius:9px}}
 
 
 /* Selected live vault details and deposit flow */
