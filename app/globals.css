@@ -814,3 +814,41 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .nav-item:nth-child(3){--tab-color:#7258e8;--tab-bg:#f0ebff}
 .nav-item:nth-child(4){--tab-color:#16896c;--tab-bg:#e8faf2}
 .nav-item:nth-child(5){--tab-color:#c16c3b;--tab-bg:#fff1e7}
+
+
+/* Stablecoin swap tab */
+.swap-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr);gap:18px;align-items:start}
+.swap-card{background:#fbf9ff;border:1px solid #d9ccf6;border-radius:22px;padding:22px;box-shadow:0 8px 28px #4d36870a;max-width:640px;width:100%;margin:0 auto}
+.swap-card-heading{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:20px}
+.swap-card-heading h2{font-size:17px;letter-spacing:-.3px;margin:0 0 5px}
+.swap-card-heading p{font-size:11px;color:#77708e;margin:0}
+.swap-network{display:flex;align-items:center;gap:6px;padding:7px 9px;border-radius:999px;background:#eee8ff;color:#55448a;font-size:10px;white-space:nowrap}
+.swap-token-box{background:#f1ecff;border:1px solid #e1d7f8;border-radius:15px;padding:15px}
+.swap-token-label{display:flex;justify-content:space-between;gap:10px;color:#766d91;font-size:10px;margin-bottom:10px}
+.swap-token-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.swap-token-row input{width:40%;min-width:0;background:transparent;border:0;outline:0;color:#30264e;font-size:27px;font-weight:650;letter-spacing:-.8px}
+.swap-token-row input::placeholder{color:#b4a9cd}
+.swap-token-select{display:flex;align-items:center;gap:7px;border:1px solid #d8c9f7;background:#fff;border-radius:12px;padding:8px 10px;color:#45356e;font-size:12px;font-weight:700;white-space:nowrap}
+.swap-token-select.static{cursor:default}
+.swap-coin{width:25px;height:25px;display:grid;place-items:center;border-radius:50%;font-size:14px;font-weight:800}
+.swap-coin.usdc{background:#dce8ff;color:#315fae}
+.swap-coin.eurc{background:#dcd2ff;color:#6545d5}
+.swap-direction{display:grid;place-items:center;width:38px;height:38px;margin:-3px auto;border-radius:12px;border:4px solid #fbf9ff;background:#e3d8ff;color:#6545d5;position:relative;z-index:1}
+.swap-direction:hover{background:#d4c5ff}
+.swap-estimate{font-size:25px;font-weight:650;letter-spacing:-.7px;color:#786f90}
+.swap-info-list{display:grid;gap:12px;margin:19px 2px}
+.swap-info-list>div{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;font-size:10px}
+.swap-info-list span{color:#817995}
+.swap-info-list strong{max-width:62%;text-align:right;color:#4c416c;font-weight:600;line-height:1.5}
+.swap-submit{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:13px;padding:14px;background:#6545d5;color:white;font-size:12px;font-weight:750}
+.swap-submit:disabled{opacity:.6}
+.swap-notice{display:flex;align-items:flex-start;gap:8px;font-size:10px;line-height:1.6;color:#6b6382;margin:13px 2px 0}
+.swap-notice svg{flex-shrink:0;color:#6545d5}
+.swap-side-note{background:#e4dcff;border:1px solid #cdbdf7;border-radius:20px;padding:21px;color:#4c3a7d}
+.swap-side-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:#d5c8fb;color:#6545d5;margin-bottom:15px}
+.swap-side-note h3{font-size:15px;margin:0 0 8px;letter-spacing:-.3px}
+.swap-side-note p{font-size:11px;line-height:1.75;color:#6d6191;margin:0}
+.swap-side-pair{display:flex;align-items:center;gap:8px;border-top:1px solid #cdbdf7;padding-top:15px;margin-top:18px}
+.swap-side-pair strong{font-size:10px;margin-left:auto;color:#5139a1}
+@media(max-width:850px){.swap-layout{grid-template-columns:1fr}.swap-side-note{max-width:640px;width:100%;margin:0 auto}}
+@media(max-width:520px){.swap-card{padding:15px;border-radius:18px}.swap-card-heading{flex-direction:column}.swap-token-row input{font-size:23px}.swap-token-select{padding:7px 8px;font-size:11px}.swap-token-label{font-size:9px}}
