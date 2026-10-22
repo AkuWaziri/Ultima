@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, ArrowDownUp, Bell,
   ChevronDown, CircleHelp, Command, Compass, ExternalLink, Eye, EyeOff,
@@ -8,7 +8,7 @@ import {
   Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal, Droplets
 } from "lucide-react";
 
-type Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
+declare global { interface Window { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown>; on?: (event: string, handler: (...args: unknown[]) => void) => void; removeListener?: (event: string, handler: (...args: unknown[]) => void) => void } }\n\ntype Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
 
 const navItems: { label: Section; icon: typeof LayoutDashboard }[] = [
   { label: "Dashboard", icon: LayoutDashboard },
@@ -46,6 +46,11 @@ export default function Home() {
   const [swapFrom, setSwapFrom] = useState<"USDC" | "EURC">("USDC");
   const [swapAmount, setSwapAmount] = useState("");
   const [connected, setConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [walletChainId, setWalletChainId] = useState<number | null>(null);
+  const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
+  const [eurcBalance, setEurcBalance] = useState<string | null>(null);
+  const [balancesLoading, setBalancesLoading] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notice, setNotice] = useState("");
@@ -120,10 +125,68 @@ export default function Home() {
     }
   };
 
-  const connectWallet = () => {
-    setNotice("Wallet connection is the next integration step. No wallet has been connected.");
-    window.setTimeout(() => setNotice(""), 4200);
+  const arcTestnet = { chainId: "0x4cef52", chainName: "Arc Testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: ["https://rpc.testnet.arc.io"], blockExplorerUrls: ["https://explorer.testnet.arc.io"] } as const;
+  const tokenAddresses = { USDC: "0x3600000000000000000000000000000000000000", EURC: "0x89b50855aa3be2f677cd6303cec089b5f319d72a" } as const;
+
+  const refreshWalletBalances = async (address: string) => {
+    const provider = window.ethereum;
+    if (!provider) return;
+    setBalancesLoading(true);
+    try {
+      const readTokenBalance = async (token: string) => {
+        const data = "0x70a08231" + address.toLowerCase().replace("0x", "").padStart(64, "0");
+        const raw = await provider.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }) as string;
+        return (Number(BigInt(raw || "0x0")) / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+      };
+      const [usdc, eurc] = await Promise.all([readTokenBalance(tokenAddresses.USDC), readTokenBalance(tokenAddresses.EURC)]);
+      setUsdcBalance(usdc);
+      setEurcBalance(eurc);
+    } catch {
+      setNotice("Could not read token balances. Check your Arc Testnet connection and retry.");
+    } finally { setBalancesLoading(false); }
   };
+
+  const connectWallet = async () => {
+    const provider = window.ethereum;
+    if (!provider) { setNotice("No compatible wallet found. Install MetaMask, Rabby, or another EVM wallet."); return; }
+    try {
+      try {
+        await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: arcTestnet.chainId }] });
+      } catch (switchError) {
+        if ((switchError as { code?: number })?.code !== 4902) throw switchError;
+        await provider.request({ method: "wallet_addEthereumChain", params: [arcTestnet] });
+      }
+      const accounts = await provider.request({ method: "eth_requestAccounts" }) as string[];
+      const chainHex = await provider.request({ method: "eth_chainId" }) as string;
+      const address = accounts?.[0];
+      const chainId = Number.parseInt(chainHex, 16);
+      if (!address) { setNotice("No wallet account was selected."); return; }
+      if (chainId !== 5042002) { setNotice("Switch your wallet to Arc Testnet to continue."); return; }
+      setWalletAddress(address); setWalletChainId(chainId); setConnected(true);
+      setNotice("Wallet connected to Arc Testnet.");
+      await refreshWalletBalances(address);
+    } catch { setNotice("Wallet connection was cancelled or failed. Try again."); }
+  };
+
+  useEffect(() => {
+    const provider = window.ethereum;
+    if (!provider?.on) return;
+    const onAccountsChanged = (...args: unknown[]) => {
+      const accounts = args[0] as string[];
+      if (!accounts?.[0]) {
+        setConnected(false); setWalletAddress(""); setUsdcBalance(null); setEurcBalance(null); setWalletChainId(null);
+      } else { setWalletAddress(accounts[0]); setConnected(true); void refreshWalletBalances(accounts[0]); }
+    };
+    const onChainChanged = (...args: unknown[]) => {
+      const chainId = Number.parseInt(String(args[0]), 16);
+      setWalletChainId(chainId);
+      if (chainId !== 5042002) { setNotice("Ultima is configured for Arc Testnet. Switch networks to continue."); setUsdcBalance(null); setEurcBalance(null); }
+      else if (walletAddress) void refreshWalletBalances(walletAddress);
+    };
+    provider.on("accountsChanged", onAccountsChanged);
+    provider.on("chainChanged", onChainChanged);
+    return () => { provider.removeListener?.("accountsChanged", onAccountsChanged); provider.removeListener?.("chainChanged", onChainChanged); };
+  }, [walletAddress]);
 
   const navigate = (next: Section) => {
     setSection(next);
@@ -145,7 +208,7 @@ export default function Home() {
           <button className="icon-button mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close menu"><X size={18} /></button>
         </div>
 
-        <div className="network-pill"><span className="network-dot" /> Arc Mainnet <ChevronDown size={14} /></div>
+        <div className="network-pill"><span className="network-dot" /> Arc Testnet <ChevronDown size={14} /></div>
 
         <div className="nav-label">WORKSPACE</div>
         <nav className="primary-nav" aria-label="Main navigation">
@@ -179,9 +242,9 @@ export default function Home() {
             <div className="breadcrumb">Workspace <span>/</span> <strong>{section}</strong></div>
           </div>
           <div className="topbar-actions">
-            <div className="network-chip"><span className="network-dot" /> Arc Mainnet</div>
+            <div className="network-chip"><span className="network-dot" /> Arc Testnet</div>
             <button className="icon-button notification-button" aria-label="Notification settings" title="Notification settings" onClick={openNotificationSettings}><Bell size={18} /><i /></button>
-            <button className="connect-button" onClick={connectWallet}><Wallet size={16} /> {connected ? "Wallet connected" : "Connect wallet"}</button>
+            <button className="connect-button" onClick={connectWallet}><Wallet size={16} /> {connected && walletAddress ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}` : "Connect wallet"}</button>
             <button className="icon-button mobile-menu" aria-label="Open navigation" onClick={() => setMobileOpen(true)}><Menu size={21} /></button>
           </div>
         </header>
@@ -207,9 +270,19 @@ export default function Home() {
               <div className="metrics-grid">
                 <div className="metric-card balance-card">
                   <div className="metric-top"><span>Total balance</span><button className="plain-icon" onClick={() => setShowBalance(!showBalance)} aria-label={showBalance ? "Hide balance" : "Show balance"}>{showBalance ? <Eye size={16} /> : <EyeOff size={16} />}</button></div>
-                  <div className="metric-value">{showBalance ? "$0.00" : "••••••"}</div>
-                  <div className="metric-foot"><span className="metric-dot lavender" /> Connect wallet to view your assets</div>
+                  <div className="metric-value">{showBalance ? (usdcBalance === null || eurcBalance === null ? "—" : `${(Number(usdcBalance.replaceAll(",", "")) + Number(eurcBalance.replaceAll(",", ""))).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`) : "••••••"}</div>
+                  <div className="metric-foot"><span className="metric-dot lavender" /> {connected ? "Arc Testnet wallet assets" : "Connect wallet to view your assets"}</div>
                   <div className="balance-decoration"><div /><div /><div /></div>
+                </div>
+                <div className="metric-card token-balance-card">
+                  <div className="metric-top"><span>USDC balance</span><span className="metric-icon mint">$</span></div>
+                  <div className="metric-value">{showBalance ? (balancesLoading ? "Loading…" : usdcBalance ?? "—") : "••••••"}</div>
+                  <div className="metric-foot">{walletAddress ? "ERC-20 balance on Arc Testnet" : "Connect wallet to load balance"}</div>
+                </div>
+                <div className="metric-card token-balance-card">
+                  <div className="metric-top"><span>EURC balance</span><span className="metric-icon lavender">€</span></div>
+                  <div className="metric-value">{showBalance ? (balancesLoading ? "Loading…" : eurcBalance ?? "—") : "••••••"}</div>
+                  <div className="metric-foot">{walletAddress ? "ERC-20 balance on Arc Testnet" : "Connect wallet to load balance"}</div>
                 </div>
                 <div className="metric-card">
                   <div className="metric-top"><span>Yield earned</span><span className="metric-icon mint"><Activity size={16} /></span></div>
@@ -255,7 +328,7 @@ export default function Home() {
               <div className="subpage-heading"><div className="eyebrow"><ArrowDownUp size={14} /> ARC SWAP</div><h1>Swap <span>stablecoins.</span></h1><p>Exchange USDC and EURC on Arc, in either direction.</p></div>
               <section className="swap-layout">
                 <div className="swap-card">
-                  <div className="swap-card-heading"><div><h2>Swap tokens</h2><p>Choose the token you send and receive.</p></div><span className="swap-network"><span className="network-dot" /> Arc Mainnet</span></div>
+                  <div className="swap-card-heading"><div><h2>Swap tokens</h2><p>Choose the token you send and receive.</p></div><span className="swap-network"><span className="network-dot" /> Arc Testnet</span></div>
                   <div className="swap-token-box">
                     <div className="swap-token-label"><span>You pay</span><span>Balance unavailable</span></div>
                     <div className="swap-token-row">
@@ -269,7 +342,7 @@ export default function Home() {
                     <div className="swap-token-row"><div className="swap-estimate"> {swapAmount && Number(swapAmount) > 0 ? "Quote unavailable" : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
                   </div>
                   <div className="swap-info-list">
-                    <div><span>Network</span><strong>Arc Mainnet</strong></div>
+                    <div><span>Network</span><strong>Arc Testnet</strong></div>
                     <div><span>Exchange rate</span><strong>Unavailable until a live quote is connected</strong></div>
                     <div><span>Network fee</span><strong>Shown before confirmation</strong></div>
                   </div>
@@ -423,10 +496,10 @@ export default function Home() {
         <div className="modal-backdrop" role="presentation" onClick={() => setFaucetOpen(false)}>
           <section className="faucet-modal" role="dialog" aria-modal="true" aria-labelledby="faucet-title" onClick={(event) => event.stopPropagation()}>
             <div className="faucet-modal-head"><div className="faucet-modal-icon"><Droplets size={22} /></div><button className="icon-button" type="button" aria-label="Close faucet" onClick={() => setFaucetOpen(false)}><X size={18} /></button></div>
-            <div className="eyebrow">ARC MAINNET FAUCET</div><h2 id="faucet-title">Get 1,000 USDC</h2><p className="faucet-modal-intro">One claim per wallet every 24 hours.</p>
+            <div className="eyebrow">ARC TESTNET FAUCET</div><h2 id="faucet-title">Get 1,000 USDC</h2><p className="faucet-modal-intro">One claim per wallet every 24 hours.</p>
             <div className="faucet-claim-summary"><span>Claim amount</span><strong>1,000 USDC</strong><span>Cooldown</span><strong>24 hours per wallet</strong><span>Network</span><strong>Arc Mainnet</strong></div>
-            <div className="faucet-warning"><ShieldCheck size={17} /><span>Claims are not active yet. Real USDC payouts require a funded faucet treasury and an onchain cooldown so the limit cannot be bypassed. Wallet connection and claim execution are not integrated yet.</span></div>
-            <button className="faucet-claim-button" type="button" disabled><Droplets size={16} /> Faucet coming soon</button>
+            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. The custom 1,000 USDC per-wallet faucet requires a separately funded contract; use Circle’s official faucet for now.</span></div>
+            <a className="faucet-claim-button" href="https://faucet.circle.com/" target="_blank" rel="noreferrer"><Droplets size={16} /> Get testnet USDC <ExternalLink size={14} /></a>
           </section>
         </div>
       )}
