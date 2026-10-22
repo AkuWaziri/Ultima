@@ -28,27 +28,6 @@ const navItems: { label: Section; icon: typeof LayoutDashboard }[] = [
   { label: "Activity", icon: Activity },
 ];
 
-const vaults = [
-  {
-    name: "Galaxy USDC",
-    provider: "Morpho vault",
-    initials: "G",
-    tone: "violet",
-    description: "A curated USDC lending strategy.",
-    tags: ["USDC", "Arc"],
-    status: "Needs live verification",
-  },
-  {
-    name: "Keyrock Prime USDC",
-    provider: "Morpho vault",
-    initials: "K",
-    tone: "blue",
-    description: "A USDC strategy curated for capital efficiency.",
-    tags: ["USDC", "Arc"],
-    status: "Needs live verification",
-  },
-];
-
 const ARC_TESTNET = { chainId: "0x4cef52", chainName: "Arc Testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: ["https://rpc.testnet.arc.io"], blockExplorerUrls: ["https://explorer.testnet.arc.io"] } as const;
 const TOKEN_ADDRESSES = { USDC: "0x3600000000000000000000000000000000000000", EURC: "0x89b50855aa3be2f677cd6303cec089b5f319d72a" } as const;
 
@@ -66,7 +45,6 @@ export default function Home() {
   const [showBalance, setShowBalance] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notice, setNotice] = useState("");
-  const [search, setSearch] = useState("");
   const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
   const [yieldExplainerOpen, setYieldExplainerOpen] = useState(false);
   const [faucetOpen, setFaucetOpen] = useState(false);
@@ -346,11 +324,6 @@ export default function Home() {
     setMobileOpen(false);
   };
 
-  const filteredVaults = vaults.filter((vault) =>
-    vault.tags[0] === asset &&
-    (vault.name + " " + vault.provider).toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <main className="app-shell">
       {mobileOpen && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
@@ -367,7 +340,7 @@ export default function Home() {
           {navItems.map(({ label, icon: Icon }) => (
             <button key={label} className={`nav-item ${section === label ? "active" : ""}`} onClick={() => navigate(label)}>
               <Icon size={18} strokeWidth={1.9} /><span>{label}</span>
-              {label === "Explore" && <span className="nav-count">2</span>}
+              {label === "Explore" && <span className="nav-count">{liveVaults.filter((vault) => vault.asset === asset).length}</span>}
             </button>
           ))}
         </nav>
@@ -417,7 +390,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <button className="faucet-mini-tab" type="button" onClick={() => setFaucetOpen(true)} aria-haspopup="dialog"><span className="faucet-mini-icon"><Droplets size={18} /></span><span className="faucet-mini-copy"><strong>USDC Faucet</strong><small>Get 20 test USDC</small></span><span className="faucet-mini-amount">Get test USDC <ArrowRight size={15} /></span></button>
+              <button className="faucet-mini-tab" type="button" onClick={() => setFaucetOpen(true)} aria-haspopup="dialog"><span className="faucet-mini-icon"><Droplets size={18} /></span><span className="faucet-mini-copy"><strong>Testnet faucet</strong><small>Request test USDC</small></span><span className="faucet-mini-amount">Get test tokens <ArrowRight size={15} /></span></button>
 
               <div className="metrics-grid">
                 <div className="metric-card balance-card">
@@ -438,8 +411,8 @@ export default function Home() {
                 </div>
                 <div className="metric-card">
                   <div className="metric-top"><span>Active positions</span><span className="metric-icon peach"><Landmark size={16} /></span></div>
-                  <div className="metric-value">0</div>
-                  <div className="metric-foot">Your positions, all in one place</div>
+                  <div className="metric-value"><span className="zero">—</span></div>
+                  <div className="metric-foot">Position count is not indexed yet</div>
                 </div>
               </div>
 
@@ -456,7 +429,7 @@ export default function Home() {
                   <button className={asset === "EURC" ? "asset-tab token-eurc selected" : "asset-tab token-eurc"} onClick={() => { setAsset("EURC"); setSelectedVaultAddress(liveVaults.find((vault) => vault.asset === "EURC")?.address || ""); }}><span className="token token-eurc">€</span><span className="vault-card-label"><strong>EURC vaults</strong><small>Euro stablecoin</small></span></button>
                 </div>
                 <section className="live-earn-panel">
-                  <div className="live-earn-heading"><div><h3>Available vaults</h3><p>Live Circle vaults plus clearly labelled testnet concepts inspired by established lending protocols.</p></div><button className="live-earn-refresh" type="button" onClick={() => { setVaultsLoading(true); void appKit.earn.exploreVaults({ chain: "Arc_Testnet", sortBy: "apy" }).then((result) => { const active = result.vaults.filter((vault) => vault.status === "active" && Boolean(vault.address) && (vault.asset === "USDC" || vault.asset === "EURC")); setLiveVaults(active); setSelectedVaultAddress((current) => current || active[0]?.address || ""); }).catch(() => setEarnStatus("Could not refresh vaults. Try again.")).finally(() => setVaultsLoading(false)); }}><Activity size={14} /> Refresh vaults</button></div>
+                  <div className="live-earn-heading"><div><h3>Available vaults</h3><p>Only active vaults returned by Circle Earn Kit are listed here.</p></div><button className="live-earn-refresh" type="button" onClick={() => { setVaultsLoading(true); void appKit.earn.exploreVaults({ chain: "Arc_Testnet", sortBy: "apy" }).then((result) => { const active = result.vaults.filter((vault) => vault.status === "active" && Boolean(vault.address) && (vault.asset === "USDC" || vault.asset === "EURC")); setLiveVaults(active); setSelectedVaultAddress((current) => current || active[0]?.address || ""); }).catch(() => setEarnStatus("Could not refresh vaults. Try again.")).finally(() => setVaultsLoading(false)); }}><Activity size={14} /> Refresh vaults</button></div>
                   {vaultsLoading ? <div className="live-earn-empty">Loading USDC and EURC testnet vaults from Circle Earn Kit…</div> : liveVaults.length === 0 ? <div className="live-earn-empty"><ShieldCheck size={18} /><span>No active USDC or EURC testnet vaults were returned. Refresh to retry; deposits stay disabled until a real supported vault is found.</span></div> : liveVaults.filter((vault) => vault.asset === asset).length === 0 ? <div className="live-earn-empty"><ShieldCheck size={18} /><span>No active {asset} testnet vault is currently available from Circle Earn Kit. Switch assets or refresh later. Deposits remain disabled until a real vault is available.</span></div> : <>
                     <div className="live-vault-list">{liveVaults.filter((vault) => vault.asset === asset).map((vault) => <button type="button" key={vault.address} className={expandedVaultAddress === vault.address ? "live-vault-option selected" : "live-vault-option"} aria-pressed={expandedVaultAddress === vault.address} onClick={() => { setSelectedVaultAddress(vault.address); setExpandedVaultAddress((current) => current === vault.address ? "" : vault.address); setEarnPosition(null); setEarnStatus(""); }}><span className={`swap-coin ${vault.asset === "EURC" ? "eurc" : "usdc"}`}>{vault.asset === "EURC" ? "€" : "$"}</span><span className="live-vault-copy"><strong>{vault.name}</strong><small>{vault.protocol} · {vault.asset} stablecoin</small></span><span className="live-vault-apy">{typeof vault.currentApy === "number" ? `${(vault.currentApy * 100).toFixed(2)}% APY` : "APY unavailable"}<small>{expandedVaultAddress === vault.address ? "Hide details" : "View details"} <ArrowRight size={12} /></small></span></button>)}</div>
                     {(() => { const selectedVault = liveVaults.find((vault) => vault.address === selectedVaultAddress && vault.asset === asset); if (!selectedVault || expandedVaultAddress !== selectedVault.address) return null; return <div className="vault-detail-card">
@@ -464,7 +437,7 @@ export default function Home() {
                       <div className="vault-detail-metrics"><div><span>Current APY</span><strong>{typeof selectedVault.currentApy === "number" ? `${(selectedVault.currentApy * 100).toFixed(2)}%` : "Not available"}</strong><small>Variable, not guaranteed</small></div><div><span>Deposit asset</span><strong>{selectedVault.asset}</strong><small>Arc Testnet</small></div></div>
                       <p className="vault-detail-note">Choose an amount and preview the deposit. When you continue, your connected wallet will show the transaction for you to review and sign. Only use testnet tokens here.</p>
                        <div className="vault-wallet-balance"><span>Wallet balance · {asset}</span><strong>{!connected || walletChainId !== 5042002 ? "Connect to Arc Testnet to view" : balancesLoading ? "Loading balance…" : (asset === "USDC" ? usdcBalance : eurcBalance) === null ? "Balance unavailable" : `${asset === "USDC" ? usdcBalance : eurcBalance} ${asset}`}</strong><button type="button" disabled={!connected || walletChainId !== 5042002 || balancesLoading || (asset === "USDC" ? usdcBalance : eurcBalance) === null || Number((asset === "USDC" ? usdcBalance : eurcBalance)?.replaceAll(",", "")) <= 0} onClick={() => setEarnAmount((asset === "USDC" ? usdcBalance : eurcBalance)?.replaceAll(",", "") || "")}>Use max</button></div>
-                       <div className="earn-actions-row"><label>Amount ({asset})<input type="number" min="0.000001" step="any" value={earnAmount} onChange={(event) => setEarnAmount(event.target.value)} /></label><div className="earn-action-buttons"><button type="button" onClick={() => runEarnAction("quote")} disabled={earnBusy || !selectedVaultAddress}>Preview deposit</button><button type="button" onClick={() => runEarnAction("deposit")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>{connected && walletChainId === 5042002 ? "Deposit & sign" : "Connect wallet to deposit"}</button><button type="button" onClick={() => runEarnAction("withdraw")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>Withdraw</button></div></div>
+                       <div className="earn-actions-row"><label>Amount ({asset})<input type="number" min="0.000001" step="any" value={earnAmount} onChange={(event) => setEarnAmount(event.target.value)} /></label><div className="earn-action-buttons"><button type="button" onClick={() => runEarnAction("quote")} disabled={earnBusy || !selectedVaultAddress}>Preview deposit</button><button type="button" onClick={() => runEarnAction("deposit")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>{connected && walletChainId === 5042002 ? "Deposit & sign" : "Connect wallet to deposit"}</button><button type="button" onClick={() => runEarnAction("withdraw")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>Withdraw</button><button type="button" onClick={() => runEarnAction("position")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>Refresh position</button></div></div>
                       {earnBusy && <div className="live-earn-status" role="status">Waiting for wallet approval or testnet confirmation…</div>}
                       {earnStatus && <div className="live-earn-status" role="status">{earnStatus}</div>}
                       {earnPosition !== null && earnPosition !== undefined && <pre className="earn-result-json">{JSON.stringify(earnPosition, null, 2)}</pre>}
@@ -645,8 +618,8 @@ export default function Home() {
           <section className="faucet-modal" role="dialog" aria-modal="true" aria-labelledby="faucet-title" onClick={(event) => event.stopPropagation()}>
             <div className="faucet-modal-head"><div className="faucet-modal-icon"><Droplets size={22} /></div><button className="icon-button" type="button" aria-label="Close faucet" onClick={() => setFaucetOpen(false)}><X size={18} /></button></div>
             <div className="eyebrow">ARC TESTNET FAUCET</div><h2 id="faucet-title">Get testnet USDC</h2><p className="faucet-modal-intro">Request test funds for Arc Testnet.</p>
-            <div className="faucet-claim-summary"><span>Amount</span><strong>20 USDC (planned)</strong><span>Availability</span><strong>Circle faucet limits apply</strong><span>Network</span><strong>Arc Testnet</strong></div>
-            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. Ultima’s custom 20 USDC faucet is not live yet because its funded on-chain faucet contract has not been deployed. Use Circle&apos;s official faucet for test funds for now.</span></div>
+            <div className="faucet-claim-summary"><span>Amount</span><strong>Set by the official faucet</strong><span>Availability</span><strong>Faucet limits apply</strong><span>Network</span><strong>Arc Testnet</strong></div>
+            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. Ultima does not distribute tokens itself. Use Circle&apos;s official faucet to request test funds.</span></div>
             <a className="faucet-claim-button" href="https://faucet.circle.com/" target="_blank" rel="noreferrer"><Droplets size={16} /> Get testnet USDC <ExternalLink size={14} /></a>
           </section>
         </div>
@@ -657,25 +630,3 @@ export default function Home() {
   );
 }
 
-function StrategyCard({ vault, onExplore }: { vault: (typeof vaults)[number]; onExplore: () => void }) {
-  return (
-    <article className={`strategy-card strategy-card-${vault.tone}`}>
-      <div className="strategy-card-top">
-        <div className={`protocol-logo ${vault.tone} asset-logo ${vault.tags[0] === "EURC" ? "asset-logo-eurc" : "asset-logo-usdc"}`} aria-label={`${vault.tags[0] === "EURC" ? "EURC euro" : "USDC"} token logo`}>
-          <span aria-hidden="true">{vault.tags[0] === "EURC" ? "€" : "$"}</span>
-        </div>
-        <div className="strategy-title"><h3>{vault.name}</h3><span>{vault.provider}</span></div>
-        <button className="card-more" aria-label={`More about ${vault.name}`} onClick={onExplore}><ArrowUpRight size={17} /></button>
-      </div>
-      <p className="strategy-description">{vault.description}</p>
-      <div className="strategy-details">
-        <div><span className="detail-label">Live APY</span><strong className="apy-pending">Awaiting verification</strong></div>
-        <div><span className="detail-label">Network</span><strong><span className="mini-network-dot" /> Arc</strong></div>
-      </div>
-      <div className="strategy-card-bottom">
-        <div className="tag-row"><span className="tag">{vault.tags[0]}</span><span className="tag">Morpho</span><span className="verify-tag"><ShieldCheck size={13} /> Pending checks</span></div>
-        <button className="explore-button" onClick={onExplore}>Explore <ArrowRight size={15} /></button>
-      </div>
-    </article>
-  );
-}
