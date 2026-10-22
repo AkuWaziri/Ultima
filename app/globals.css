@@ -806,3 +806,11 @@ button:disabled{cursor:not-allowed;opacity:.58}
   .yield-modal h2{font-size:21px}
   .yield-modal-actions .connect-button{width:100%}
 }
+
+
+/* Navigation accents for Dashboard, Explore and Intelligence */
+.nav-item:nth-child(1){--tab-color:#7258e8;--tab-bg:#f0ebff}
+.nav-item:nth-child(2){--tab-color:#287fba;--tab-bg:#eaf5ff}
+.nav-item:nth-child(3){--tab-color:#7258e8;--tab-bg:#f0ebff}
+.nav-item:nth-child(4){--tab-color:#16896c;--tab-bg:#e8faf2}
+.nav-item:nth-child(5){--tab-color:#c16c3b;--tab-bg:#fff1e7}
