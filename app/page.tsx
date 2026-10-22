@@ -151,7 +151,7 @@ export default function Home() {
       const response = await fetch("/api/strategy-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ asset, riskPreference }),
+        body: JSON.stringify({ asset, riskPreference, vaults: liveVaults.filter((vault) => vault.asset === asset).map((vault) => ({ name: vault.name, protocol: vault.protocol, asset: vault.asset, currentApy: typeof vault.currentApy === "number" ? vault.currentApy : null, status: vault.status })) }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Strategy analysis is temporarily unavailable.");
