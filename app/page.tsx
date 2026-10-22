@@ -103,6 +103,13 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const matchingVault = liveVaults.find((vault) => vault.asset === asset);
+    const selectedVault = liveVaults.find((vault) => vault.address === selectedVaultAddress);
+    if (matchingVault && selectedVault?.asset !== asset) setSelectedVaultAddress(matchingVault.address);
+    else if (!matchingVault && selectedVault && selectedVault.asset !== asset) setSelectedVaultAddress("");
+  }, [asset, liveVaults, selectedVaultAddress]);
+
+  useEffect(() => {
     let cancelled = false;
     const loadVaults = async () => {
       setVaultsLoading(true);
@@ -649,7 +656,7 @@ export default function Home() {
           <section className="faucet-modal" role="dialog" aria-modal="true" aria-labelledby="faucet-title" onClick={(event) => event.stopPropagation()}>
             <div className="faucet-modal-head"><div className="faucet-modal-icon"><Droplets size={22} /></div><button className="icon-button" type="button" aria-label="Close faucet" onClick={() => setFaucetOpen(false)}><X size={18} /></button></div>
             <div className="eyebrow">ARC TESTNET FAUCET</div><h2 id="faucet-title">Get testnet USDC</h2><p className="faucet-modal-intro">Request test funds for Arc Testnet.</p>
-            <div className="faucet-claim-summary"><span>Asset</span><strong>Testnet USDC</strong><span>Availability</span><strong>External faucet limits apply</strong><span>Network</span><strong>Arc Mainnet</strong></div>
+            <div className="faucet-claim-summary"><span>Asset</span><strong>Testnet USDC</strong><span>Availability</span><strong>External faucet limits apply</strong><span>Network</span><strong>Arc Testnet</strong></div>
             <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. Ultima’s custom 1,000 USDC per-wallet faucet and 24-hour cooldown still require a deployed, funded contract. Use Circle&apos;s official faucet for now.</span></div>
             <a className="faucet-claim-button" href="https://faucet.circle.com/" target="_blank" rel="noreferrer"><Droplets size={16} /> Get testnet USDC <ExternalLink size={14} /></a>
           </section>
