@@ -537,7 +537,7 @@ export default function Home() {
 
           {section === "Strategies" && (
             <>
-              <div className="subpage-heading"><div className="eyebrow"><Bot size={14} /> INTELLIGENCE</div><h1>Strategy <span>analyst.</span></h1><p>Compare risk trade-offs with Ultima Intelligence before making a decision.</p></div>
+              <div className="subpage-heading"><div className="eyebrow"><Bot size={14} /> INTELLIGENCE</div><h1>Strategy <span>analyst.</span></h1></div>
               <section className="ai-strategy-panel" aria-labelledby="ai-strategy-title">
                 <div className="ai-panel-visual"><Bot size={24} /></div>
                 <div className="ai-panel-main">
@@ -592,7 +592,7 @@ export default function Home() {
 
           {section === "Activity" && (
             <>
-              <div className="subpage-heading"><div className="eyebrow"><Activity size={14} /> TRANSACTION HISTORY</div><h1>Your activity, <span>clearly tracked.</span></h1><p>Deposits, withdrawals and contract interactions will be listed here.</p></div>
+              <div className="subpage-heading"><div className="eyebrow"><Activity size={14} /> TRANSACTION HISTORY</div><h1>Your activity, <span>clearly tracked.</span></h1></div>
               <div className="activity-table panel">
                 <div className="table-head"><span>TRANSACTION</span><span>NETWORK</span><span>STATUS</span><span>DATE</span></div>
                 {txHistory.length === 0 ? <div className="empty-state"><div className="empty-icon"><Clock3 size={20} /></div><strong>No testnet transactions yet</strong><p>Successful swaps, deposits and withdrawals made through Ultima will appear here on this device.</p></div> : <div className="activity-record-list">{txHistory.map((tx) => <div className="activity-record" key={tx.id}><div className="activity-record-icon"><ArrowUpRight size={16} /></div><div className="activity-record-main"><strong>{tx.action} · {tx.asset}</strong><span>{new Date(tx.createdAt).toLocaleString()}</span></div><div className="activity-record-amount">{tx.amount}</div><a href={tx.explorerUrl} target="_blank" rel="noreferrer" aria-label="View transaction on Arc Testnet explorer"><ExternalLink size={15} /></a></div>)}</div>}
