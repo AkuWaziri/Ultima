@@ -456,13 +456,9 @@ export default function Home() {
             <>
               <div className="subpage-heading"><h1>Explore Stablecoins Yeilds</h1><p>USDC and EURC on Arc.</p></div>
               <section className="section-block">
-                <div className="section-heading">
-                  <div><h2>Explore Stablecoins Yeilds</h2><p>USDC and EURC on Arc.</p></div>
-                  <button className="text-link" onClick={() => navigate("Strategies")}>View all strategies <ArrowRight size={16} /></button>
-                </div>
-                <div className="asset-switch" role="group" aria-label="Choose asset">
-                  <button className={asset === "USDC" ? "asset-tab selected" : "asset-tab"} onClick={() => { setAsset("USDC"); setSelectedVaultAddress(liveVaults.find((vault) => vault.asset === "USDC")?.address || ""); }}><span className="token token-usdc">$</span> USDC <span className="asset-live">START HERE</span></button>
-                  <button className={asset === "EURC" ? "asset-tab selected" : "asset-tab"} onClick={() => { setAsset("EURC"); setSelectedVaultAddress(liveVaults.find((vault) => vault.asset === "EURC")?.address || ""); }}><span className="token token-eurc">€</span> EURC</button>
+                <div className="asset-switch vault-asset-cards" role="group" aria-label="Choose asset">
+                  <button className={asset === "USDC" ? "asset-tab token-usdc selected" : "asset-tab token-usdc"} onClick={() => { setAsset("USDC"); setSelectedVaultAddress(liveVaults.find((vault) => vault.asset === "USDC")?.address || ""); }}><span className="token token-usdc">$</span><span className="vault-card-label"><strong>USDC vaults</strong><small>Dollar stablecoin</small></span><span className="vault-card-arrow"><ArrowRight size={17} /></span></button>
+                  <button className={asset === "EURC" ? "asset-tab token-eurc selected" : "asset-tab token-eurc"} onClick={() => { setAsset("EURC"); setSelectedVaultAddress(liveVaults.find((vault) => vault.asset === "EURC")?.address || ""); }}><span className="token token-eurc">€</span><span className="vault-card-label"><strong>EURC vaults</strong><small>Euro stablecoin</small></span><span className="vault-card-arrow"><ArrowRight size={17} /></span></button>
                 </div>
                 <div className="data-note"><ShieldCheck size={16} /><span>Testing mode: only active vaults returned by Circle Earn Kit are listed here. APYs are provider data, not guaranteed returns. Testnet tokens have no real-world value.</span></div>
                 <section className="live-earn-panel">
