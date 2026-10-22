@@ -457,12 +457,26 @@ export default function Home() {
                 </div>
                 <section className="live-earn-panel">
                   <div className="live-earn-heading"><div><h3>Available vaults</h3><p>Live Circle vaults plus clearly labelled testnet concepts inspired by established lending protocols.</p></div><button className="live-earn-refresh" type="button" onClick={() => { setVaultsLoading(true); void appKit.earn.exploreVaults({ chain: "Arc_Testnet", sortBy: "apy" }).then((result) => { const active = result.vaults.filter((vault) => vault.status === "active" && Boolean(vault.address) && (vault.asset === "USDC" || vault.asset === "EURC")); setLiveVaults(active); setSelectedVaultAddress((current) => current || active[0]?.address || ""); }).catch(() => setEarnStatus("Could not refresh vaults. Try again.")).finally(() => setVaultsLoading(false)); }}><Activity size={14} /> Refresh vaults</button></div>
-                  <div className="demo-vault-heading"><strong>Testnet vault concepts</strong><span>Preview only · no deposits</span></div>
-                  <div className="demo-vault-list" aria-label="Demo vault concepts">
-                    <article className="demo-vault-card"><span className="demo-vault-icon">$</span><div className="demo-vault-copy"><strong>Morpho Blue · USDC</strong><span>Isolated lending market concept</span><small>Inspired by Morpho · Not deployed</small></div><span className="demo-vault-badge">Demo</span></article>
-                    <article className="demo-vault-card"><span className="demo-vault-icon">€</span><div className="demo-vault-copy"><strong>Morpho Blue · EURC</strong><span>Euro stablecoin lending concept</span><small>Inspired by Morpho · Not deployed</small></div><span className="demo-vault-badge">Demo</span></article>
-                    <article className="demo-vault-card"><span className="demo-vault-icon">$</span><div className="demo-vault-copy"><strong>Aave-style Supply · USDC</strong><span>Supply and earn lending concept</span><small>Inspired by Aave · Not deployed</small></div><span className="demo-vault-badge">Demo</span></article>
-                    <article className="demo-vault-card"><span className="demo-vault-icon">€</span><div className="demo-vault-copy"><strong>Aave-style Supply · EURC</strong><span>Euro supply market concept</span><small>Inspired by Aave · Not deployed</small></div><span className="demo-vault-badge">Demo</span></article>
+                  <div className="demo-vault-heading"><strong>{asset} vault concepts</strong><span>Preview only · no deposits</span></div>
+                  <div className="demo-vault-list" aria-label={`${asset} demo vault concepts`}>
+                    {(asset === "USDC" ? [
+                      { name: "Morpho Blue · USDC", description: "Isolated USDC lending market concept", protocol: "Inspired by Morpho" },
+                      { name: "Aave-style Supply · USDC", description: "Supply USDC to a lending market concept", protocol: "Inspired by Aave" },
+                    ] : [
+                      { name: "Morpho Blue · EURC", description: "Isolated EURC lending market concept", protocol: "Inspired by Morpho" },
+                      { name: "Aave-style Supply · EURC", description: "Supply EURC to a lending market concept", protocol: "Inspired by Aave" },
+                    ]).map((demo) => (
+                      <article className="demo-vault-card" key={demo.name}>
+                        <span className="demo-vault-icon">{asset === "USDC" ? "$" : "€"}</span>
+                        <div className="demo-vault-copy">
+                          <strong>{demo.name}</strong>
+                          <span>{demo.description}</span>
+                          <small>{demo.protocol} · Not deployed</small>
+                          <div className="demo-vault-info"><span>Asset <b>{asset}</b></span><span>Network <b>Arc Testnet</b></span><span>APY <b>Not available</b></span></div>
+                        </div>
+                        <span className="demo-vault-badge">Demo</span>
+                      </article>
+                    ))}
                   </div>
                   {vaultsLoading ? <div className="live-earn-empty">Loading USDC and EURC testnet vaults from Circle Earn Kit…</div> : liveVaults.length === 0 ? <div className="live-earn-empty"><ShieldCheck size={18} /><span>No active USDC or EURC testnet vaults were returned. Refresh to retry; deposits stay disabled until a real supported vault is found.</span></div> : liveVaults.filter((vault) => vault.asset === asset).length === 0 ? <div className="live-earn-empty"><ShieldCheck size={18} /><span>No active {asset} testnet vault is currently available from Circle Earn Kit. Switch assets or refresh later. Deposits remain disabled until a real vault is available.</span></div> : <>
                     <div className="live-vault-list">{liveVaults.filter((vault) => vault.asset === asset).map((vault) => <button type="button" key={vault.address} className={expandedVaultAddress === vault.address ? "live-vault-option selected" : "live-vault-option"} aria-pressed={expandedVaultAddress === vault.address} onClick={() => { setSelectedVaultAddress(vault.address); setExpandedVaultAddress((current) => current === vault.address ? "" : vault.address); setEarnPosition(null); setEarnStatus(""); }}><span className={`swap-coin ${vault.asset === "EURC" ? "eurc" : "usdc"}`}>{vault.asset === "EURC" ? "€" : "$"}</span><span className="live-vault-copy"><strong>{vault.name}</strong><small>{vault.protocol} · {vault.asset} stablecoin</small></span><span className="live-vault-apy">{typeof vault.currentApy === "number" ? `${(vault.currentApy * 100).toFixed(2)}% APY` : "APY unavailable"}<small>{expandedVaultAddress === vault.address ? "Hide details" : "View details"} <ArrowRight size={12} /></small></span></button>)}</div>
