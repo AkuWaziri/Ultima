@@ -942,21 +942,20 @@ button:disabled{cursor:not-allowed;opacity:.58}
 
 
 /* Explore asset selectors presented as distinct vault cards */
-.vault-asset-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0 20px}
-.vault-asset-cards .asset-tab{display:flex;align-items:center;gap:14px;min-height:108px;padding:20px 22px;border:1px solid transparent;border-radius:20px;text-align:left;box-shadow:0 8px 24px rgba(30,35,70,.055);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-.vault-asset-cards .asset-tab:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(30,35,70,.1)}
+.vault-asset-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 14px}
+.vault-asset-cards .asset-tab{display:flex;align-items:center;gap:10px;min-height:58px;padding:9px 12px;border:1px solid transparent;border-radius:13px;text-align:left;box-shadow:0 4px 12px rgba(30,35,70,.045);transition:box-shadow .18s ease,border-color .18s ease}
+.vault-asset-cards .asset-tab:hover{box-shadow:0 7px 16px rgba(30,35,70,.08)}
 .vault-asset-cards .asset-tab.token-usdc{background:linear-gradient(135deg,#edf5ff 0%,#dceaff 100%);border-color:#b9d5ff;color:#174d8b}
 .vault-asset-cards .asset-tab.token-eurc{background:linear-gradient(135deg,#eafbf3 0%,#d4f5e6 100%);border-color:#a8e4c9;color:#12674f}
 .vault-asset-cards .asset-tab.token-usdc.selected{border-color:#438ce5;box-shadow:0 0 0 2px #8bbaff inset,0 10px 24px rgba(43,111,196,.12)}
 .vault-asset-cards .asset-tab.token-eurc.selected{border-color:#32a77d;box-shadow:0 0 0 2px #83d9b7 inset,0 10px 24px rgba(34,153,111,.12)}
-.vault-asset-cards .asset-tab .token{width:46px;height:46px;display:grid;place-items:center;flex:0 0 46px;border-radius:15px;font-size:23px;font-weight:800}
+.vault-asset-cards .asset-tab .token{width:32px;height:32px;display:grid;place-items:center;flex:0 0 32px;border-radius:10px;font-size:17px;font-weight:800}
 .vault-asset-cards .asset-tab.token-usdc .token{background:#c8e0ff;color:#145bb0}
 .vault-asset-cards .asset-tab.token-eurc .token{background:#bff0d9;color:#087a58}
-.vault-card-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
-.vault-card-label strong{font-size:16px;font-weight:750}
-.vault-card-label small{font-size:12px;opacity:.78;font-weight:500}
-.vault-card-arrow{display:grid;place-items:center;opacity:.8}
-@media(max-width:600px){.vault-asset-cards{grid-template-columns:1fr;gap:10px}.vault-asset-cards .asset-tab{min-height:88px;padding:16px 18px;border-radius:16px}}
+.vault-card-label{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+.vault-card-label strong{font-size:13px;font-weight:750}
+.vault-card-label small{font-size:10px;opacity:.78;font-weight:500}
+@media(max-width:600px){.vault-asset-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.vault-asset-cards .asset-tab{min-height:54px;padding:8px 9px;border-radius:12px;gap:7px}.vault-card-label strong{font-size:12px}.vault-card-label small{font-size:9px}.vault-asset-cards .asset-tab .token{width:28px;height:28px;flex-basis:28px;font-size:15px;border-radius:9px}}
 
 
 /* Selected live vault details and deposit flow */
