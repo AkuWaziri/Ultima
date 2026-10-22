@@ -46,6 +46,9 @@ const vaults = [
   },
 ];
 
+const ARC_TESTNET = { chainId: "0x4cef52", chainName: "Arc Testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: ["https://rpc.testnet.arc.io"], blockExplorerUrls: ["https://explorer.testnet.arc.io"] } as const;
+const TOKEN_ADDRESSES = { USDC: "0x3600000000000000000000000000000000000000", EURC: "0x89b50855aa3be2f677cd6303cec089b5f319d72a" } as const;
+
 export default function Home() {
   const [section, setSection] = useState<Section>("Dashboard");
   const [asset, setAsset] = useState<"USDC" | "EURC">("USDC");
@@ -130,9 +133,6 @@ export default function Home() {
     }
   };
 
-  const arcTestnet = { chainId: "0x4cef52", chainName: "Arc Testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: ["https://rpc.testnet.arc.io"], blockExplorerUrls: ["https://explorer.testnet.arc.io"] } as const;
-  const tokenAddresses = { USDC: "0x3600000000000000000000000000000000000000", EURC: "0x89b50855aa3be2f677cd6303cec089b5f319d72a" } as const;
-
   const refreshWalletBalances = useCallback(async (address: string) => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) return;
@@ -143,7 +143,7 @@ export default function Home() {
         const raw = await provider.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }) as string;
         return (Number(BigInt(raw || "0x0")) / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
       };
-      const [usdc, eurc] = await Promise.all([readTokenBalance(tokenAddresses.USDC), readTokenBalance(tokenAddresses.EURC)]);
+      const [usdc, eurc] = await Promise.all([readTokenBalance(TOKEN_ADDRESSES.USDC), readTokenBalance(TOKEN_ADDRESSES.EURC)]);
       setUsdcBalance(usdc);
       setEurcBalance(eurc);
     } catch {
@@ -156,10 +156,10 @@ export default function Home() {
     if (!provider) { setNotice("No compatible wallet found. Install MetaMask, Rabby, or another EVM wallet."); return; }
     try {
       try {
-        await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: arcTestnet.chainId }] });
+        await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_TESTNET.chainId }] });
       } catch (switchError) {
         if ((switchError as { code?: number })?.code !== 4902) throw switchError;
-        await provider.request({ method: "wallet_addEthereumChain", params: [arcTestnet] });
+        await provider.request({ method: "wallet_addEthereumChain", params: [ARC_TESTNET] });
       }
       const accounts = await provider.request({ method: "eth_requestAccounts" }) as string[];
       const chainHex = await provider.request({ method: "eth_chainId" }) as string;
@@ -445,7 +445,7 @@ export default function Home() {
               <article><span>01</span><div><strong>Choose an asset</strong><p>Select USDC or EURC, depending on which stablecoin you hold and want to use.</p></div></article>
               <article><span>02</span><div><strong>Review the strategy</strong><p>Check how it works, expected return, liquidity, fees, contract permissions and independent security information before committing funds.</p></div></article>
               <article><span>03</span><div><strong>Understand the risks</strong><p>Stablecoins can lose their peg. Smart contracts, lending markets and liquidity can fail or change. Past returns do not guarantee future results.</p></div></article>
-              <article><span>04</span><div><strong>Deposit only after verification</strong><p>Ultima's listed vaults are currently awaiting live onchain verification. Deposits are not enabled here. Do not send funds to an unverified contract.</p></div></article>
+              <article><span>04</span><div><strong>Deposit only after verification</strong><p>Ultima&apos;s listed vaults are currently awaiting live onchain verification. Deposits are not enabled here. Do not send funds to an unverified contract.</p></div></article>
             </div>
             <div className="yield-modal-note"><ShieldCheck size={16} /> Ultima will show current rates and enable strategy actions only after the relevant onchain details are verified.</div>
             <div className="yield-modal-actions"><button className="connect-button" onClick={() => { setYieldExplainerOpen(false); navigate("Strategies"); }}>Explore strategies <ArrowUpRight size={15} /></button></div>
