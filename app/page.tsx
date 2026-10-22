@@ -5,7 +5,7 @@ import {
   Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, ArrowDownUp, Bell,
   ChevronDown, CircleHelp, Command, Compass, ExternalLink, Eye, EyeOff,
   LayoutDashboard, Menu, Plus, Search, ShieldCheck, Bot, Wallet, X,
-  Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal
+  Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal, Droplets
 } from "lucide-react";
 
 type Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
@@ -52,6 +52,7 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
   const [yieldExplainerOpen, setYieldExplainerOpen] = useState(false);
+  const [faucetOpen, setFaucetOpen] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
   const [notificationTelegram, setNotificationTelegram] = useState("");
   const [notificationPrefs, setNotificationPrefs] = useState({
@@ -200,6 +201,8 @@ export default function Home() {
                   <div className="art-spark spark-one"></div><div className="art-spark spark-two"></div>
                 </div>
               </div>
+
+              <button className="faucet-mini-tab" type="button" onClick={() => setFaucetOpen(true)} aria-haspopup="dialog"><span className="faucet-mini-icon"><Droplets size={18} /></span><span className="faucet-mini-copy"><strong>USDC Faucet</strong><small>Claim test funds every 24 hours</small></span><span className="faucet-mini-amount">1,000 USDC <ArrowRight size={15} /></span></button>
 
               <div className="metrics-grid">
                 <div className="metric-card balance-card">
@@ -412,6 +415,18 @@ export default function Home() {
               <button className="connect-button" onClick={saveNotificationSettings}>Save preferences</button>
             </div>
             {notificationSaved && <div className="notification-saved" role="status"><CircleCheck size={15} /> Preferences saved on this device.</div>}
+          </section>
+        </div>
+      )}
+
+      {faucetOpen && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setFaucetOpen(false)}>
+          <section className="faucet-modal" role="dialog" aria-modal="true" aria-labelledby="faucet-title" onClick={(event) => event.stopPropagation()}>
+            <div className="faucet-modal-head"><div className="faucet-modal-icon"><Droplets size={22} /></div><button className="icon-button" type="button" aria-label="Close faucet" onClick={() => setFaucetOpen(false)}><X size={18} /></button></div>
+            <div className="eyebrow">ARC MAINNET FAUCET</div><h2 id="faucet-title">Get 1,000 USDC</h2><p className="faucet-modal-intro">One claim per wallet every 24 hours.</p>
+            <div className="faucet-claim-summary"><span>Claim amount</span><strong>1,000 USDC</strong><span>Cooldown</span><strong>24 hours per wallet</strong><span>Network</span><strong>Arc Mainnet</strong></div>
+            <div className="faucet-warning"><ShieldCheck size={17} /><span>Claims are not active yet. Real USDC payouts require a funded faucet treasury and an onchain cooldown so the limit cannot be bypassed. Wallet connection and claim execution are not integrated yet.</span></div>
+            <button className="faucet-claim-button" type="button" disabled><Droplets size={16} /> Faucet coming soon</button>
           </section>
         </div>
       )}
