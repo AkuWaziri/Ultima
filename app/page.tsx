@@ -469,7 +469,7 @@ export default function Home() {
                        <div className="earn-actions-row"><label>Amount ({asset})<input type="number" min="0.000001" step="any" value={earnAmount} onChange={(event) => setEarnAmount(event.target.value)} /></label><div className="earn-action-buttons"><button type="button" onClick={() => runEarnAction("quote")} disabled={earnBusy || !selectedVaultAddress}>Preview deposit</button><button type="button" onClick={() => runEarnAction("deposit")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>{connected && walletChainId === 5042002 ? "Deposit & sign" : "Connect wallet to deposit"}</button><button type="button" onClick={() => runEarnAction("position")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>My position</button><button type="button" onClick={() => runEarnAction("withdraw")} disabled={earnBusy || !selectedVaultAddress || !connected || walletChainId !== 5042002}>Withdraw</button></div></div>
                       {earnBusy && <div className="live-earn-status" role="status">Waiting for wallet approval or testnet confirmation…</div>}
                       {earnStatus && <div className="live-earn-status" role="status">{earnStatus}</div>}
-                      {earnPosition && <pre className="earn-result-json">{JSON.stringify(earnPosition, null, 2)}</pre>}
+                      {earnPosition !== null && earnPosition !== undefined && <pre className="earn-result-json">{JSON.stringify(earnPosition, null, 2)}</pre>}
                     </div>; })()}
                   </>}
                 </section>
