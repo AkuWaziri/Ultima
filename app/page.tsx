@@ -16,6 +16,7 @@ type EthereumProvider = CreateViemAdapterFromProviderParams["provider"] & { on?:
 const appKit = new AppKit();
 
 type UltimaTransaction = { id: string; action: string; asset: string; amount: string; txHash: string; explorerUrl: string; createdAt: string };
+type WalletPosition = { vaultAddress: string; name: string; asset: string; currentBalance: string; currentApy: number | null; principalDeposited: string | null; totalYieldEarned: string | null };
 
 type Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
 
@@ -74,6 +75,9 @@ export default function Home() {
   const [swapQuote, setSwapQuote] = useState<{ amountOut: string; effectiveRate: string } | null>(null);
   const [txHistory, setTxHistory] = useState<UltimaTransaction[]>([]);
   const [yieldEarned, setYieldEarned] = useState<string | null>(null);
+  const [walletPositions, setWalletPositions] = useState<WalletPosition[]>([]);
+  const [positionsLoading, setPositionsLoading] = useState(false);
+  const [positionsChecked, setPositionsChecked] = useState(false);
 
   useEffect(() => {
     try {
@@ -269,6 +273,55 @@ export default function Home() {
     } catch (error) {
       setSwapStatus(error instanceof Error ? error.message : "Swap failed. Check testnet liquidity and try a smaller amount.");
     } finally { setSwapBusy(false); }
+  };
+
+  const refreshAllPositions = async () => {
+    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
+    if (!provider || !walletAddress || !connected || walletChainId !== 5042002) {
+      setEarnStatus("Connect your wallet to Arc Testnet to check positions.");
+      return;
+    }
+    if (liveVaults.length === 0) {
+      setWalletPositions([]);
+      setPositionsChecked(true);
+      setEarnStatus("No active Circle Earn Kit testnet vaults are available to check.");
+      return;
+    }
+    setPositionsLoading(true);
+    try {
+      const adapter = await createViemAdapterFromProvider({ provider });
+      const results = await Promise.all(liveVaults.map(async (vault) => {
+        try {
+          const result = await appKit.earn.getPosition({
+            from: { adapter, chain: "Arc_Testnet" },
+            vaultAddress: vault.address,
+          });
+          const position = result as {
+            currentBalance?: string;
+            currentApy?: number;
+            pnl?: { principalDeposited?: string; totalYieldEarned?: string };
+          };
+          if (!position.currentBalance || !Number.isFinite(Number(position.currentBalance)) || Number(position.currentBalance) <= 0) return null;
+          return {
+            vaultAddress: vault.address,
+            name: vault.name,
+            asset: vault.asset,
+            currentBalance: position.currentBalance,
+            currentApy: typeof position.currentApy === "number" ? position.currentApy : null,
+            principalDeposited: position.pnl?.principalDeposited ?? null,
+            totalYieldEarned: position.pnl?.totalYieldEarned ?? null,
+          } satisfies WalletPosition;
+        } catch {
+          return null;
+        }
+      }));
+      setWalletPositions(results.filter((position): position is WalletPosition => position !== null));
+      setPositionsChecked(true);
+    } catch {
+      setEarnStatus("Could not refresh wallet positions. Check your Arc Testnet connection and retry.");
+    } finally {
+      setPositionsLoading(false);
+    }
   };
 
   const runEarnAction = async (action: "quote" | "deposit" | "position" | "withdraw") => {
@@ -518,8 +571,21 @@ export default function Home() {
 
           {section === "My positions" && (
             <>
-              <div className="subpage-heading"><div className="eyebrow"><Wallet size={14} /> YOUR PORTFOLIO</div><h1>All your positions, <span>in one place.</span></h1><p>Track balances and strategy performance after connecting your wallet.</p></div>
-              <div className="empty-state large-empty"><div className="empty-illustration"><Wallet size={26} /><span>+</span></div><h2>No positions yet</h2><p>Connect your wallet and choose a verified strategy to see your stablecoin positions here.</p><button className="connect-button" onClick={connectWallet}><Wallet size={16} /> Connect wallet</button></div>
+              <div className="subpage-heading"><div className="eyebrow"><Wallet size={14} /> YOUR PORTFOLIO</div><h1>All your positions, <span>in one place.</span></h1><p>Read live position balances from the active Circle Earn Kit vaults on Arc Testnet.</p></div>
+              <div className="positions-toolbar">
+                <button className="connect-button" onClick={() => void refreshAllPositions()} disabled={!connected || walletChainId !== 5042002 || positionsLoading}>
+                  <Activity size={16} /> {positionsLoading ? "Checking positions…" : "Refresh positions"}
+                </button>
+                {!connected && <span>Connect your wallet to load positions.</span>}
+              </div>
+              {walletPositions.length > 0 ? <div className="strategy-grid full-strategy-grid">
+                {walletPositions.map((position) => <article className="strategy-card" key={position.vaultAddress}>
+                  <div className="strategy-card-top"><div className={`protocol-logo ${position.asset === "EURC" ? "blue" : "violet"}`}>{position.asset === "EURC" ? "€" : "$"}</div><div className="strategy-title"><h3>{position.name}</h3><span>{position.asset} · Arc Testnet</span></div><a className="card-more" href={`https://explorer.testnet.arc.io/address/${position.vaultAddress}`} target="_blank" rel="noreferrer" aria-label="View vault on Arc Testnet explorer"><ExternalLink size={15} /></a></div>
+                  <div className="strategy-details"><div><span className="detail-label">Current position</span><strong>{position.currentBalance} {position.asset}</strong></div><div><span className="detail-label">Current APY</span><strong>{position.currentApy === null ? "Unavailable" : `${(position.currentApy * 100).toFixed(2)}%`}</strong></div></div>
+                  <div className="strategy-card-bottom"><span className="tag">Testnet only</span><button className="explore-button" onClick={() => { setAsset(position.asset as "USDC" | "EURC"); setSelectedVaultAddress(position.vaultAddress); setExpandedVaultAddress(position.vaultAddress); navigate("Explore"); }}>Manage position <ArrowRight size={15} /></button></div>
+                  <p className="strategy-description">Principal: {position.principalDeposited ?? "Unavailable"} {position.asset} · Yield/loss: {position.totalYieldEarned ?? "Unavailable"} {position.asset}</p>
+                </article>)}
+              </div> : <div className="empty-state large-empty"><div className="empty-illustration"><Wallet size={26} /><span>+</span></div><h2>{positionsLoading ? "Checking your positions…" : positionsChecked ? "No active positions found" : "Check your positions"}</h2><p>{positionsChecked ? "No positive balance was returned for the currently available Circle Earn Kit vaults. If you deposited elsewhere, this list may not include that vault yet." : "Connect your wallet and refresh to read balances from the currently supported testnet vaults."}</p>{!connected && <button className="connect-button" onClick={connectWallet}><Wallet size={16} /> Connect wallet</button>}</div>}
             </>
           )}
 
