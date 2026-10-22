@@ -480,7 +480,7 @@ export default function Home() {
 
           {section === "Swap" && (
             <>
-              <div className="subpage-heading"><div className="eyebrow"><ArrowDownUp size={14} /> ARC SWAP</div><h1>Swap <span>stablecoins.</span></h1><p>Exchange USDC and EURC on Arc, in either direction.</p></div>
+              <div className="subpage-heading"><div className="eyebrow"><ArrowDownUp size={14} /> ULTIMA STABLECOINS DEX</div><p>Exchange USDC and EURC on Arc, in either direction.</p></div>
               <section className="swap-layout">
                 <div className="swap-card">
                   <div className="swap-card-heading"><div><h2>Swap tokens</h2><p>Choose the token you send and receive.</p></div><span className="swap-network"><span className="network-dot" /> Arc Testnet</span></div>
