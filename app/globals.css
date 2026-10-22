@@ -1069,3 +1069,8 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .live-vault-list>.live-vault-option:nth-child(6n+4) .live-vault-apy{color:#7a42ad!important}
 .live-vault-list>.live-vault-option:nth-child(6n+5) .live-vault-apy{color:#b3425c!important}
 .live-vault-list>.live-vault-option:nth-child(6n) .live-vault-apy{color:#087985!important}
+
+
+/* Keep the footer comfortably separated from the main content. */
+.page-content>.page-footer{margin-top:48px}
+@media(max-width:700px){.page-content>.page-footer{margin-top:36px}}
