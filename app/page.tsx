@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 type EthereumProvider = CreateViemAdapterFromProviderParams["provider"] & { on?: (event: string, handler: (...args: unknown[]) => void) => void; removeListener?: (event: string, handler: (...args: unknown[]) => void) => void };
+const appKit = new AppKit();
 
 type UltimaTransaction = { id: string; action: string; asset: string; amount: string; txHash: string; explorerUrl: string; createdAt: string };
 
