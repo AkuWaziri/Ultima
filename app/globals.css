@@ -1035,3 +1035,22 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .live-vault-option:has(.swap-coin.eurc) .live-vault-apy{color:#087c61}
 .live-vault-option:has(.swap-coin.eurc).selected{background:linear-gradient(135deg,#d7f8e9 0%,#b9efd8 100%);border-color:#35ad86;box-shadow:0 0 0 2px #8bdabb inset}
 @media(max-width:700px){.live-vault-list{grid-template-columns:1fr;gap:11px}.live-vault-option{min-height:158px;padding:17px;border-radius:17px}.live-vault-apy{font-size:20px}}
+
+
+/* Give every live vault its own clearly separated card and unique colour, even when assets match */
+.live-vault-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px;padding:2px}
+.live-vault-option{width:100%;min-width:0;border:1px solid transparent;box-shadow:0 5px 16px rgba(37,33,62,.06)}
+.live-vault-option:nth-child(6n+1){background:linear-gradient(135deg,#edf4ff 0%,#d6e6ff 100%);border-color:#b4cefa;color:#214e89}
+.live-vault-option:nth-child(6n+2){background:linear-gradient(135deg,#e9fbf3 0%,#c9f1df 100%);border-color:#a3dfc3;color:#17664f}
+.live-vault-option:nth-child(6n+3){background:linear-gradient(135deg,#fff3e7 0%,#ffe0c3 100%);border-color:#f2c69c;color:#8b4c20}
+.live-vault-option:nth-child(6n+4){background:linear-gradient(135deg,#f8edff 0%,#e9d5ff 100%);border-color:#d4b4f1;color:#693b91}
+.live-vault-option:nth-child(6n+5){background:linear-gradient(135deg,#fff0f2 0%,#ffd9df 100%);border-color:#f2b8c3;color:#963c52}
+.live-vault-option:nth-child(6n){background:linear-gradient(135deg,#e8fbfc 0%,#c9f0f2 100%);border-color:#a0dfe3;color:#17636b}
+.live-vault-option:nth-child(6n+1) .live-vault-apy{color:#155db5}
+.live-vault-option:nth-child(6n+2) .live-vault-apy{color:#087c61}
+.live-vault-option:nth-child(6n+3) .live-vault-apy{color:#a45a20}
+.live-vault-option:nth-child(6n+4) .live-vault-apy{color:#7a42ad}
+.live-vault-option:nth-child(6n+5) .live-vault-apy{color:#b3425c}
+.live-vault-option:nth-child(6n) .live-vault-apy{color:#087985}
+.live-vault-option.selected{box-shadow:0 0 0 2px currentColor inset,0 8px 20px rgba(37,33,62,.1)}
+@media(max-width:700px){.live-vault-list{grid-template-columns:1fr;gap:12px}.live-vault-option{min-height:158px;padding:17px}}
