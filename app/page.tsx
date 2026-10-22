@@ -12,7 +12,7 @@ import {
   Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal, Droplets
 } from "lucide-react";
 
-type EthereumProvider = CreateViemAdapterFromProviderParams["provider"];
+type EthereumProvider = CreateViemAdapterFromProviderParams["provider"] & { on?: (event: string, handler: (...args: unknown[]) => void) => void; removeListener?: (event: string, handler: (...args: unknown[]) => void) => void };
 
 type UltimaTransaction = { id: string; action: string; asset: string; amount: string; txHash: string; explorerUrl: string; createdAt: string };
 
@@ -293,6 +293,7 @@ export default function Home() {
       else if (action === "position") {
         result = await appKit.earn.getPosition({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress });
         setEarnPosition(result);
+        setYieldEarned((result as { pnl?: { totalYieldEarned?: string } }).pnl?.totalYieldEarned ?? null);
       } else result = await appKit.earn.withdraw({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress, amount: earnAmount });
       const output = result as { txHash?: string; explorerUrl?: string; currentBalance?: string; pnl?: { totalYieldEarned?: string } };
       if (action === "position") {
