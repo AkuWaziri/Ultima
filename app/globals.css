@@ -957,3 +957,25 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .vault-card-label small{font-size:12px;opacity:.78;font-weight:500}
 .vault-card-arrow{display:grid;place-items:center;opacity:.8}
 @media(max-width:600px){.vault-asset-cards{grid-template-columns:1fr;gap:10px}.vault-asset-cards .asset-tab{min-height:88px;padding:16px 18px;border-radius:16px}}
+
+
+/* Selected live vault details and deposit flow */
+.vault-detail-card{margin-top:16px;padding:22px;border:1px solid #e6e3f4;border-radius:20px;background:linear-gradient(145deg,#fff 0%,#f8f7ff 100%);box-shadow:0 10px 30px rgba(56,42,110,.06)}
+.vault-detail-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.vault-detail-top h4{margin:7px 0 5px;font-family:Manrope,sans-serif;font-size:20px;font-weight:800;letter-spacing:-.03em}
+.vault-detail-top p{margin:0;color:var(--muted);font-size:13px}
+.vault-detail-token{display:grid;place-items:center;width:46px;height:46px;border-radius:15px;font-size:24px;font-weight:800}
+.vault-detail-token.usdc{color:#2867c8;background:#e4efff}
+.vault-detail-token.eurc{color:#138365;background:#dcf8eb}
+.vault-detail-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+.vault-detail-metrics>div{display:flex;flex-direction:column;gap:5px;padding:15px;border:1px solid #eceaf6;border-radius:14px;background:#fff}
+.vault-detail-metrics span,.vault-address-line>span{color:var(--muted);font-size:12px}
+.vault-detail-metrics strong{font-size:21px;font-family:Manrope,sans-serif}
+.vault-detail-metrics small{color:var(--muted);font-size:11px}
+.vault-address-line{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:#f0eef9;min-width:0}
+.vault-address-line>span{flex-shrink:0}
+.vault-address-line code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:11px;color:#4f4778}
+.vault-address-line button{border:0;background:transparent;color:var(--purple-dark);font-size:12px;font-weight:700}
+.vault-detail-note{margin:15px 0;color:#73748f;font-size:12px;line-height:1.65}
+.live-vault-apy small{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:5px;color:#777b99;font-size:10px;font-weight:600}
+@media(max-width:640px){.vault-detail-card{padding:16px;border-radius:16px}.vault-detail-top h4{font-size:18px}.vault-address-line{align-items:flex-start;flex-wrap:wrap}.vault-address-line code{flex-basis:100%;order:3;white-space:normal;overflow-wrap:anywhere}.vault-detail-metrics strong{font-size:18px}.live-vault-apy small{font-size:9px}}
