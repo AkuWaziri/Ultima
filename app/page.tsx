@@ -58,6 +58,7 @@ export default function Home() {
   const [swapAmount, setSwapAmount] = useState("");
   const [connected, setConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
+  const [walletChainId, setWalletChainId] = useState<number | null>(null);
   const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const [eurcBalance, setEurcBalance] = useState<string | null>(null);
   const [balancesLoading, setBalancesLoading] = useState(false);
@@ -209,7 +210,7 @@ export default function Home() {
       const chainId = Number.parseInt(chainHex, 16);
       if (!address) { setNotice("No wallet account was selected."); return; }
       if (chainId !== 5042002) { setNotice("Switch your wallet to Arc Testnet to continue."); return; }
-      setWalletAddress(address); setConnected(true);
+      setWalletAddress(address); setWalletChainId(chainId); setConnected(true);
       setNotice("Wallet connected to Arc Testnet.");
       await refreshWalletBalances(address);
     } catch { setNotice("Wallet connection was cancelled or failed. Try again."); }
@@ -226,6 +227,7 @@ export default function Home() {
     };
     const onChainChanged = (...args: unknown[]) => {
       const chainId = Number.parseInt(String(args[0]), 16);
+      setWalletChainId(chainId);
       if (chainId !== 5042002) { setNotice("Ultima is configured for Arc Testnet. Switch networks to continue."); setUsdcBalance(null); setEurcBalance(null); }
       else if (walletAddress) void refreshWalletBalances(walletAddress);
     };
@@ -236,7 +238,7 @@ export default function Home() {
 
   const getSwapQuote = async () => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
-    if (!provider || !walletAddress || !connected) { setSwapStatus("Connect your wallet first."); return; }
+    if (!provider || !walletAddress || !connected || walletChainId !== 5042002) { setSwapStatus("Connect your wallet to Arc Testnet first."); return; }
     if (!swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) { setSwapStatus("Enter a valid amount greater than zero."); return; }
     setSwapBusy(true); setSwapStatus(""); setSwapQuote(null);
     try {
@@ -280,7 +282,7 @@ export default function Home() {
 
   const runEarnAction = async (action: "quote" | "deposit" | "position" | "withdraw") => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
-    if (!provider || !walletAddress || !connected) { setEarnStatus("Connect your wallet to use a testnet vault."); return; }
+    if (!provider || !walletAddress || !connected || walletChainId !== 5042002) { setEarnStatus("Connect your wallet to Arc Testnet to use a testnet vault."); return; }
     if (!selectedVaultAddress) { setEarnStatus("No active testnet vault is available for this asset."); return; }
     const amount = Number(earnAmount);
     if (action !== "position" && (!Number.isFinite(amount) || amount <= 0)) { setEarnStatus("Enter a valid amount greater than zero."); return; }
@@ -403,7 +405,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <button className="faucet-mini-tab" type="button" onClick={() => setFaucetOpen(true)} aria-haspopup="dialog"><span className="faucet-mini-icon"><Droplets size={18} /></span><span className="faucet-mini-copy"><strong>USDC Faucet</strong><small>Claim test funds every 24 hours</small></span><span className="faucet-mini-amount">1,000 USDC <ArrowRight size={15} /></span></button>
+              <button className="faucet-mini-tab" type="button" onClick={() => setFaucetOpen(true)} aria-haspopup="dialog"><span className="faucet-mini-icon"><Droplets size={18} /></span><span className="faucet-mini-copy"><strong>USDC Faucet</strong><small>Claim test funds every 24 hours</small></span><span className="faucet-mini-amount">Get test USDC <ArrowRight size={15} /></span></button>
 
               <div className="metrics-grid">
                 <div className="metric-card balance-card">
@@ -425,7 +427,7 @@ export default function Home() {
                 <div className="metric-card">
                   <div className="metric-top"><span>Yield earned</span><span className="metric-icon mint"><Activity size={16} /></span></div>
                   <div className="metric-value">$<span className="zero">{yieldEarned ?? "—"}</span></div>
-                  <div className="metric-foot"><span className="subtle-pill">Ready when you are</span></div>
+                  <div className="metric-foot"><span className="subtle-pill">{yieldEarned === null ? "Check position to load yield" : "Accrued testnet yield"}</span></div>
                 </div>
                 <div className="metric-card">
                   <div className="metric-top"><span>Active positions</span><span className="metric-icon peach"><Landmark size={16} /></span></div>
@@ -494,8 +496,8 @@ export default function Home() {
                     <div><span>Exchange rate</span><strong>{swapQuote ? `1 ${swapFrom} ≈ ${swapQuote.effectiveRate} ${swapFrom === "USDC" ? "EURC" : "USDC"}` : "Get a live quote before swapping"}</strong></div>
                     <div><span>Network fee</span><strong>Shown before confirmation</strong></div>
                   </div>
-                  <button type="button" className="swap-quote-button" onClick={getSwapQuote} disabled={swapBusy || !connected || !swapAmount || Number(swapAmount) <= 0}>{swapBusy ? "Fetching quote…" : "Get live quote"}</button>
-                  <button type="button" className="swap-submit" onClick={runSwap} disabled={swapBusy || !connected || !swapAmount || Number(swapAmount) <= 0 || !swapQuote}><ArrowDownUp size={16} /> {swapBusy ? "Waiting for wallet…" : `Swap ${swapFrom} for ${swapFrom === "USDC" ? "EURC" : "USDC"}`}</button>
+                  <button type="button" className="swap-quote-button" onClick={getSwapQuote} disabled={swapBusy || !connected || walletChainId !== 5042002 || !swapAmount || Number(swapAmount) <= 0}>{swapBusy ? "Fetching quote…" : "Get live quote"}</button>
+                  <button type="button" className="swap-submit" onClick={runSwap} disabled={swapBusy || !connected || walletChainId !== 5042002 || !swapAmount || Number(swapAmount) <= 0 || !swapQuote}><ArrowDownUp size={16} /> {swapBusy ? "Waiting for wallet…" : `Swap ${swapFrom} for ${swapFrom === "USDC" ? "EURC" : "USDC"}`}</button>
                   {swapStatus && <p className="swap-notice" role="status"><ShieldCheck size={15} /> {swapStatus}</p>}
                   <p className="swap-notice"><ShieldCheck size={15} /> Testnet only. Review the wallet request carefully. Swap availability depends on live routing and liquidity; no rate is guaranteed before submission.</p>
                 </div>
@@ -646,9 +648,9 @@ export default function Home() {
         <div className="modal-backdrop" role="presentation" onClick={() => setFaucetOpen(false)}>
           <section className="faucet-modal" role="dialog" aria-modal="true" aria-labelledby="faucet-title" onClick={(event) => event.stopPropagation()}>
             <div className="faucet-modal-head"><div className="faucet-modal-icon"><Droplets size={22} /></div><button className="icon-button" type="button" aria-label="Close faucet" onClick={() => setFaucetOpen(false)}><X size={18} /></button></div>
-            <div className="eyebrow">ARC TESTNET FAUCET</div><h2 id="faucet-title">Get 1,000 USDC</h2><p className="faucet-modal-intro">One claim per wallet every 24 hours.</p>
-            <div className="faucet-claim-summary"><span>Claim amount</span><strong>1,000 USDC</strong><span>Cooldown</span><strong>24 hours per wallet</strong><span>Network</span><strong>Arc Mainnet</strong></div>
-            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. The custom 1,000 USDC per-wallet faucet requires a separately funded contract; use Circle&apos;s official faucet for now.</span></div>
+            <div className="eyebrow">ARC TESTNET FAUCET</div><h2 id="faucet-title">Get testnet USDC</h2><p className="faucet-modal-intro">Request test funds for Arc Testnet.</p>
+            <div className="faucet-claim-summary"><span>Asset</span><strong>Testnet USDC</strong><span>Availability</span><strong>External faucet limits apply</strong><span>Network</span><strong>Arc Mainnet</strong></div>
+            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. Ultima’s custom 1,000 USDC per-wallet faucet and 24-hour cooldown still require a deployed, funded contract. Use Circle&apos;s official faucet for now.</span></div>
             <a className="faucet-claim-button" href="https://faucet.circle.com/" target="_blank" rel="noreferrer"><Droplets size={16} /> Get testnet USDC <ExternalLink size={14} /></a>
           </section>
         </div>
