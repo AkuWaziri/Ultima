@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import {
-  Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, Bell,
+  Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, ArrowDownUp, Bell,
   ChevronDown, CircleHelp, Command, Compass, ExternalLink, Eye, EyeOff,
   LayoutDashboard, Menu, Plus, Search, ShieldCheck, Bot, Wallet, X,
   Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal
 } from "lucide-react";
 
-type Section = "Dashboard" | "Explore" | "Strategies" | "My positions" | "Activity";
+type Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
 
 const navItems: { label: Section; icon: typeof LayoutDashboard }[] = [
   { label: "Dashboard", icon: LayoutDashboard },
   { label: "Explore", icon: Compass },
+  { label: "Swap", icon: ArrowDownUp },
   { label: "Strategies", icon: Bot },
   { label: "My positions", icon: Wallet },
   { label: "Activity", icon: Activity },
@@ -42,6 +43,8 @@ const vaults = [
 export default function Home() {
   const [section, setSection] = useState<Section>("Dashboard");
   const [asset, setAsset] = useState<"USDC" | "EURC">("USDC");
+  const [swapFrom, setSwapFrom] = useState<"USDC" | "EURC">("USDC");
+  const [swapAmount, setSwapAmount] = useState("");
   const [connected, setConnected] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -241,6 +244,37 @@ export default function Home() {
                 {vaults.some((vault) => vault.tags[0] === asset) ? <div className="data-note"><ShieldCheck size={16} /><span>Rates and vault safety checks will be shown only after live onchain verification. No estimated APY is presented as current.</span></div> : <div className="empty-state asset-empty"><div className="empty-icon"><Landmark size={20} /></div><strong>No {asset} strategies listed yet</strong><p>{asset} is supported by Ultima. Verified vault options will appear here once their onchain details are confirmed.</p></div>}
               </section>
 
+            </>
+          )}
+
+          {section === "Swap" && (
+            <>
+              <div className="subpage-heading"><div className="eyebrow"><ArrowDownUp size={14} /> ARC SWAP</div><h1>Swap <span>stablecoins.</span></h1><p>Exchange USDC and EURC on Arc, in either direction.</p></div>
+              <section className="swap-layout">
+                <div className="swap-card">
+                  <div className="swap-card-heading"><div><h2>Swap tokens</h2><p>Choose the token you send and receive.</p></div><span className="swap-network"><span className="network-dot" /> Arc Mainnet</span></div>
+                  <div className="swap-token-box">
+                    <div className="swap-token-label"><span>You pay</span><span>Balance unavailable</span></div>
+                    <div className="swap-token-row">
+                      <input type="number" min="0" step="any" inputMode="decimal" placeholder="0.00" value={swapAmount} onChange={(event) => setSwapAmount(event.target.value)} aria-label="Amount to swap" />
+                      <button type="button" className="swap-token-select" aria-label={`Pay with ${swapFrom}`}><span className={`swap-coin ${swapFrom.toLowerCase()}`}>{swapFrom === "USDC" ? "$" : "€"}</span>{swapFrom}<ChevronDown size={15} /></button>
+                    </div>
+                  </div>
+                  <button type="button" className="swap-direction" onClick={() => setSwapFrom((current) => current === "USDC" ? "EURC" : "USDC")} aria-label="Switch swap direction"><ArrowDownUp size={18} /></button>
+                  <div className="swap-token-box swap-receive">
+                    <div className="swap-token-label"><span>You receive</span><span>Estimated amount</span></div>
+                    <div className="swap-token-row"><div className="swap-estimate"> {swapAmount && Number(swapAmount) > 0 ? "Quote unavailable" : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
+                  </div>
+                  <div className="swap-info-list">
+                    <div><span>Network</span><strong>Arc Mainnet</strong></div>
+                    <div><span>Exchange rate</span><strong>Unavailable until a live quote is connected</strong></div>
+                    <div><span>Network fee</span><strong>Shown before confirmation</strong></div>
+                  </div>
+                  <button type="button" className="swap-submit" disabled><ArrowDownUp size={16} /> Swap unavailable</button>
+                  <p className="swap-notice"><ShieldCheck size={15} /> Swaps are not enabled yet. Ultima needs a verified Arc swap route and live quote before it can submit transactions. No funds will be moved from this screen.</p>
+                </div>
+                <aside className="swap-side-note"><div className="swap-side-icon"><ShieldCheck size={20} /></div><h3>Built for stablecoins on Arc</h3><p>Swap supports the two directions: USDC to EURC and EURC to USDC. A live price, slippage estimate, token balances and transaction confirmation will appear once a verified route is integrated.</p><div className="swap-side-pair"><span className="swap-coin usdc">$</span><ArrowRight size={15} /><span className="swap-coin eurc">€</span><strong>USDC ↔ EURC</strong></div></aside>
+              </section>
             </>
           )}
 
