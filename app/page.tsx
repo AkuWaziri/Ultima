@@ -357,6 +357,7 @@ export default function Home() {
         setEarnPosition(updatedPosition);
         setYieldEarned((updatedPosition as { pnl?: { totalYieldEarned?: string } }).pnl?.totalYieldEarned ?? null);
         await refreshWalletBalances(walletAddress);
+        await refreshAllPositions();
       }
     } catch (error) {
       setEarnStatus(error instanceof Error ? error.message : "The vault action failed. Check your balance and try again.");
