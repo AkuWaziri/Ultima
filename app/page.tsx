@@ -191,7 +191,8 @@ export default function Home() {
     try {
       const readTokenBalance = async (token: string) => {
         const data = "0x70a08231" + address.toLowerCase().replace("0x", "").padStart(64, "0");
-        const raw = await provider.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }) as string;
+        const rpcProvider = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+        const raw = await rpcProvider.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }) as string;
         return (Number(BigInt(raw || "0x0")) / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
       };
       const [usdc, eurc] = await Promise.all([readTokenBalance(TOKEN_ADDRESSES.USDC), readTokenBalance(TOKEN_ADDRESSES.EURC)]);
@@ -413,7 +414,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <button className="faucet-mini-tab" type="button" onClick={() => setFaucetOpen(true)} aria-haspopup="dialog"><span className="faucet-mini-icon"><Droplets size={18} /></span><span className="faucet-mini-copy"><strong>USDC Faucet</strong><small>Claim test funds every 24 hours</small></span><span className="faucet-mini-amount">Get test USDC <ArrowRight size={15} /></span></button>
+              <button className="faucet-mini-tab" type="button" onClick={() => setFaucetOpen(true)} aria-haspopup="dialog"><span className="faucet-mini-icon"><Droplets size={18} /></span><span className="faucet-mini-copy"><strong>USDC Faucet</strong><small>Get 20 test USDC</small></span><span className="faucet-mini-amount">Get test USDC <ArrowRight size={15} /></span></button>
 
               <div className="metrics-grid">
                 <div className="metric-card balance-card">
@@ -450,10 +451,10 @@ export default function Home() {
 
           {section === "Explore" && (
             <>
-              <div className="subpage-heading"><div className="eyebrow"><Compass size={14} /> EXPLORE</div><h1>Explore <span>strategies.</span></h1><p>Explore stablecoin strategies for USDC and EURC on Arc.</p></div>
+              <div className="subpage-heading"><h1>Explore Stablecoins Yeilds</h1><p>USDC and EURC on Arc.</p></div>
               <section className="section-block">
                 <div className="section-heading">
-                  <div><h2>Explore strategies</h2><p>Explore stablecoin strategies for USDC and EURC on Arc.</p></div>
+                  <div><h2>Explore Stablecoins Yeilds</h2><p>USDC and EURC on Arc.</p></div>
                   <button className="text-link" onClick={() => navigate("Strategies")}>View all strategies <ArrowRight size={16} /></button>
                 </div>
                 <div className="asset-switch" role="group" aria-label="Choose asset">
@@ -657,8 +658,8 @@ export default function Home() {
           <section className="faucet-modal" role="dialog" aria-modal="true" aria-labelledby="faucet-title" onClick={(event) => event.stopPropagation()}>
             <div className="faucet-modal-head"><div className="faucet-modal-icon"><Droplets size={22} /></div><button className="icon-button" type="button" aria-label="Close faucet" onClick={() => setFaucetOpen(false)}><X size={18} /></button></div>
             <div className="eyebrow">ARC TESTNET FAUCET</div><h2 id="faucet-title">Get testnet USDC</h2><p className="faucet-modal-intro">Request test funds for Arc Testnet.</p>
-            <div className="faucet-claim-summary"><span>Asset</span><strong>Testnet USDC</strong><span>Availability</span><strong>External faucet limits apply</strong><span>Network</span><strong>Arc Testnet</strong></div>
-            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. Ultima’s custom 1,000 USDC per-wallet faucet and 24-hour cooldown still require a deployed, funded contract. Use Circle&apos;s official faucet for now.</span></div>
+            <div className="faucet-claim-summary"><span>Amount</span><strong>20 USDC (planned)</strong><span>Availability</span><strong>Circle faucet limits apply</strong><span>Network</span><strong>Arc Testnet</strong></div>
+            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. Ultima’s custom 20 USDC faucet is not live yet because its funded on-chain faucet contract has not been deployed. Use Circle&apos;s official faucet for test funds for now.</span></div>
             <a className="faucet-claim-button" href="https://faucet.circle.com/" target="_blank" rel="noreferrer"><Droplets size={16} /> Get testnet USDC <ExternalLink size={14} /></a>
           </section>
         </div>
