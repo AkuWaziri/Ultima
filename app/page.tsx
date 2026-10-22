@@ -8,7 +8,9 @@ import {
   Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal, Droplets
 } from "lucide-react";
 
-declare global { interface Window { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown>; on?: (event: string, handler: (...args: unknown[]) => void) => void; removeListener?: (event: string, handler: (...args: unknown[]) => void) => void } }\n\ntype Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
+declare global { interface Window { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown>; on?: (event: string, handler: (...args: unknown[]) => void) => void; removeListener?: (event: string, handler: (...args: unknown[]) => void) => void } }
+
+type Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
 
 const navItems: { label: Section; icon: typeof LayoutDashboard }[] = [
   { label: "Dashboard", icon: LayoutDashboard },
