@@ -1080,3 +1080,5 @@ button:disabled{cursor:not-allowed;opacity:.58}
 
 
 .positions-toolbar{display:flex;align-items:center;gap:14px;margin:0 0 18px}.positions-toolbar>span{font-size:11px;color:#9293a8}.positions-toolbar .connect-button:disabled{opacity:.6;cursor:wait}@media(max-width:600px){.positions-toolbar{align-items:flex-start;flex-direction:column;gap:9px}}
+
+.earn-result-summary{display:grid;gap:8px;margin-top:13px;padding:13px;border:1px solid #ece8fb;border-radius:10px;background:#fcfbff}.earn-result-summary>strong{font-size:11px;color:#6252a8}.earn-result-summary>div{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;font-size:10px}.earn-result-summary>div span{color:#9293a8}.earn-result-summary>div strong{max-width:70%;overflow-wrap:anywhere;text-align:right;color:#555570}.earn-result-summary>a{display:inline-flex;align-items:center;gap:6px;color:#6c52da;font-size:10px;font-weight:700;text-decoration:none;margin-top:4px}
