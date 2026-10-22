@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, Bell,
   ChevronDown, CircleHelp, Command, Compass, ExternalLink, Eye, EyeOff,
-  LayoutDashboard, Menu, Plus, Search, ShieldCheck, Sparkles, Wallet, X,
+  LayoutDashboard, Menu, Plus, Search, ShieldCheck, Bot, Wallet, X,
   Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal
 } from "lucide-react";
 
@@ -47,6 +47,7 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [search, setSearch] = useState("");
   const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
+  const [yieldExplainerOpen, setYieldExplainerOpen] = useState(false);
   const [notificationEmail, setNotificationEmail] = useState("");
   const [notificationTelegram, setNotificationTelegram] = useState("");
   const [notificationPrefs, setNotificationPrefs] = useState({
@@ -152,11 +153,11 @@ export default function Home() {
         </nav>
 
         <div className="sidebar-bottom">
-          <div className="help-card">
+          <button className="help-card" type="button" onClick={() => setYieldExplainerOpen(true)} aria-haspopup="dialog">
             <div className="help-icon"><CircleHelp size={17} /></div>
             <div><strong>New to yield?</strong><p>Learn how strategies work before you deposit.</p></div>
             <ArrowUpRight size={15} className="help-arrow" />
-          </div>
+          </button>
           <div className="sidebar-foot">
             <div className="avatar">U</div>
             <div className="profile-copy"><strong>Guest workspace</strong><span>Connect to get started</span></div>
@@ -192,7 +193,7 @@ export default function Home() {
                 <div className="welcome-art" aria-hidden="true">
                   <div className="orbit orbit-one" /><div className="orbit orbit-two" />
                   <div className="art-coin coin-back">€</div><div className="art-coin coin-front">$</div>
-                  <div className="art-spark spark-one">✦</div><div className="art-spark spark-two">✳</div>
+                  <div className="art-spark spark-one"></div><div className="art-spark spark-two"></div>
                 </div>
               </div>
 
@@ -240,7 +241,7 @@ export default function Home() {
               <div className="subpage-heading"><div className="eyebrow"><Compass size={14} /> DISCOVER</div><h1>Find your <span>next strategy.</span></h1><p>Compare verified opportunities before you put funds to work.</p></div>
               <div className="strategy-toolbar"><div className="search-box"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search strategies" aria-label="Search strategies" /></div><div className="filter-pill"><SlidersHorizontal size={15} /> {asset} on Arc <ChevronDown size={14} /></div></div>
               <section className="ai-strategy-panel" aria-labelledby="ai-strategy-title">
-                <div className="ai-panel-visual"><Sparkles size={22} /></div>
+                <div className="ai-panel-visual"><Bot size={24} /></div>
                 <div className="ai-panel-main">
                   <div className="eyebrow">ULTIMA INTELLIGENCE</div>
                   <h2 id="ai-strategy-title">AI strategy analyst</h2>
@@ -260,7 +261,7 @@ export default function Home() {
                       </select>
                     </label>
                     <button className="ai-analyze-button" onClick={runStrategyAnalysis} disabled={analysisLoading}>
-                      <Sparkles size={16} /> {analysisLoading ? "Analyzing…" : "Analyze strategies"}
+                      <Bot size={16} /> {analysisLoading ? "Analyzing…" : "Analyze strategies"}
                     </button>
                   </div>
                   <div className="ai-safety-note"><ShieldCheck size={15} /> Candidate integrations only. Live APY, liquidity, audits and contract details are not yet verified.</div>
@@ -305,6 +306,30 @@ export default function Home() {
           </footer>
         </div>
       </section>
+
+      {yieldExplainerOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setYieldExplainerOpen(false);
+        }}>
+          <section className="yield-modal" role="dialog" aria-modal="true" aria-labelledby="yield-explainer-title">
+            <div className="yield-modal-head">
+              <div className="yield-modal-icon"><Bot size={21} /></div>
+              <button className="icon-button" aria-label="Close yield explainer" onClick={() => setYieldExplainerOpen(false)}><X size={18} /></button>
+            </div>
+            <div className="eyebrow">THE BASICS</div>
+            <h2 id="yield-explainer-title">How stablecoin yield works</h2>
+            <p className="yield-modal-intro">Yield is a return you may earn by putting stablecoins to work in a lending or other onchain strategy. Returns are not guaranteed, and your funds can be at risk.</p>
+            <div className="yield-steps">
+              <article><span>01</span><div><strong>Choose an asset</strong><p>Select USDC or EURC, depending on which stablecoin you hold and want to use.</p></div></article>
+              <article><span>02</span><div><strong>Review the strategy</strong><p>Check how it works, expected return, liquidity, fees, contract permissions and independent security information before committing funds.</p></div></article>
+              <article><span>03</span><div><strong>Understand the risks</strong><p>Stablecoins can lose their peg. Smart contracts, lending markets and liquidity can fail or change. Past returns do not guarantee future results.</p></div></article>
+              <article><span>04</span><div><strong>Deposit only after verification</strong><p>Ultima's listed vaults are currently awaiting live onchain verification. Deposits are not enabled here. Do not send funds to an unverified contract.</p></div></article>
+            </div>
+            <div className="yield-modal-note"><ShieldCheck size={16} /> Ultima will show current rates and enable strategy actions only after the relevant onchain details are verified.</div>
+            <div className="yield-modal-actions"><button className="connect-button" onClick={() => { setYieldExplainerOpen(false); navigate("Strategies"); }}>Explore strategies <ArrowUpRight size={15} /></button></div>
+          </section>
+        </div>
+      )}
 
       {notificationSettingsOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
