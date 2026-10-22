@@ -986,3 +986,19 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .vault-wallet-balance>button{border:1px solid #dcd6f6;border-radius:9px;padding:7px 11px;background:#f4f0ff;color:#5b42a8;font-size:11px;font-weight:750;white-space:nowrap}
 .vault-wallet-balance>button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:540px){.vault-wallet-balance{flex-wrap:wrap;gap:8px}.vault-wallet-balance>strong{margin-left:auto}.vault-wallet-balance>span{flex:1}.vault-wallet-balance>button{margin-left:auto}}
+
+
+/* Refined vertical rhythm: reduce oversized gaps across the app */
+.page-content{padding-top:24px}
+.welcome-row{min-height:unset;padding-top:0;padding-bottom:8px;margin-top:-8px}
+.faucet-mini-tab{margin-bottom:12px;padding-top:12px;padding-bottom:12px}
+.metrics-grid{margin-top:0;margin-bottom:26px}
+.section-block{margin-bottom:24px}
+.bottom-grid{margin-bottom:24px}
+.subpage-heading{padding-top:8px;padding-bottom:18px}
+.strategy-toolbar{margin-bottom:13px}
+.live-earn-panel{margin-top:18px}
+.vault-detail-card{margin-top:12px}
+@media(min-width:1500px){.page-content{padding-top:28px}.welcome-row{min-height:unset}}
+@media(max-width:960px){.page-content{padding-top:21px}.welcome-row{margin-top:-5px}}
+@media(max-width:700px){.page-content{padding-top:17px}.welcome-row{padding-bottom:7px;margin-top:-4px}.faucet-mini-tab{margin-bottom:10px}.metrics-grid{margin-bottom:22px}.section-block{margin-bottom:21px}.bottom-grid{margin-bottom:20px}.subpage-heading{padding-top:5px;padding-bottom:15px}}
