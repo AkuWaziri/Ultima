@@ -88,6 +88,7 @@ export default function Home() {
   const [earnPosition, setEarnPosition] = useState<unknown>(null);
   const [swapBusy, setSwapBusy] = useState(false);
   const [swapStatus, setSwapStatus] = useState("");
+  const [swapQuote, setSwapQuote] = useState<{ amountOut: string; effectiveRate: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -222,6 +223,26 @@ export default function Home() {
     return () => { provider.removeListener?.("accountsChanged", onAccountsChanged); provider.removeListener?.("chainChanged", onChainChanged); };
   }, [refreshWalletBalances, walletAddress]);
 
+  const getSwapQuote = async () => {
+    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
+    if (!provider || !walletAddress || !connected) { setSwapStatus("Connect your wallet first."); return; }
+    if (!swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) { setSwapStatus("Enter a valid amount greater than zero."); return; }
+    setSwapBusy(true); setSwapStatus(""); setSwapQuote(null);
+    try {
+      const adapter = await createViemAdapterFromProvider({ provider });
+      const result = await appKit.estimateSwap({
+        from: { adapter, chain: "Arc_Testnet", address: walletAddress },
+        tokenIn: swapFrom,
+        tokenOut: swapFrom === "USDC" ? "EURC" : "USDC",
+        amountIn: swapAmount,
+      });
+      const amountOut = result.estimatedOutput.amount;
+      setSwapQuote({ amountOut, effectiveRate: (Number(amountOut) / Number(swapAmount)).toFixed(6) });
+    } catch (error) {
+      setSwapStatus(error instanceof Error ? error.message : "A live quote is unavailable. Try a smaller amount or retry later.");
+    } finally { setSwapBusy(false); }
+  };
+
   const runSwap = async () => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider || !walletAddress || !connected) { setSwapStatus("Connect your wallet first."); return; }
@@ -238,6 +259,7 @@ export default function Home() {
       });
       const outcome = result as { txHash?: string; explorerUrl?: string; amountOut?: string };
       setSwapStatus(outcome.explorerUrl ? `Swap submitted: ${outcome.explorerUrl}` : `Swap completed. Transaction: ${outcome.txHash ?? "confirmed by App Kit"}`);
+      setSwapQuote(null);
       await refreshWalletBalances(walletAddress);
     } catch (error) {
       setSwapStatus(error instanceof Error ? error.message : "Swap failed. Check testnet liquidity and try a smaller amount.");
@@ -430,21 +452,22 @@ export default function Home() {
                   <div className="swap-token-box">
                     <div className="swap-token-label"><span>You pay</span><span>Balance: {swapFrom === "USDC" ? (usdcBalance ?? "—") : (eurcBalance ?? "—")}</span></div>
                     <div className="swap-token-row">
-                      <input type="number" min="0" step="any" inputMode="decimal" placeholder="0.00" value={swapAmount} onChange={(event) => setSwapAmount(event.target.value)} aria-label="Amount to swap" />
+                      <input type="number" min="0" step="any" inputMode="decimal" placeholder="0.00" value={swapAmount} onChange={(event) => { setSwapAmount(event.target.value); setSwapQuote(null); }} aria-label="Amount to swap" />
                       <button type="button" className="swap-token-select" aria-label={`Pay with ${swapFrom}`}><span className={`swap-coin ${swapFrom.toLowerCase()}`}>{swapFrom === "USDC" ? "$" : "€"}</span>{swapFrom}<ChevronDown size={15} /></button>
                     </div>
                   </div>
-                  <button type="button" className="swap-direction" onClick={() => setSwapFrom((current) => current === "USDC" ? "EURC" : "USDC")} aria-label="Switch swap direction"><ArrowDownUp size={18} /></button>
+                  <button type="button" className="swap-direction" onClick={() => { setSwapFrom((current) => current === "USDC" ? "EURC" : "USDC"); setSwapQuote(null); }} aria-label="Switch swap direction"><ArrowDownUp size={18} /></button>
                   <div className="swap-token-box swap-receive">
                     <div className="swap-token-label"><span>You receive</span><span>Estimated amount</span></div>
-                    <div className="swap-token-row"><div className="swap-estimate"> {swapAmount && Number(swapAmount) > 0 ? "Quote on submit" : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
+                    <div className="swap-token-row"><div className="swap-estimate"> {swapQuote ? swapQuote.amountOut : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
                   </div>
                   <div className="swap-info-list">
                     <div><span>Network</span><strong>Arc Testnet</strong></div>
-                    <div><span>Exchange rate</span><strong>Live route quote generated by Circle App Kit at swap time</strong></div>
+                    <div><span>Exchange rate</span><strong>{swapQuote ? `1 ${swapFrom} ≈ ${swapQuote.effectiveRate} ${swapFrom === "USDC" ? "EURC" : "USDC"}` : "Get a live quote before swapping"}</strong></div>
                     <div><span>Network fee</span><strong>Shown before confirmation</strong></div>
                   </div>
-                  <button type="button" className="swap-submit" onClick={runSwap} disabled={swapBusy || !connected || !swapAmount || Number(swapAmount) <= 0}><ArrowDownUp size={16} /> {swapBusy ? "Waiting for wallet…" : `Swap ${swapFrom} for ${swapFrom === "USDC" ? "EURC" : "USDC"}`}</button>
+                  <button type="button" className="swap-quote-button" onClick={getSwapQuote} disabled={swapBusy || !connected || !swapAmount || Number(swapAmount) <= 0}>{swapBusy ? "Fetching quote…" : "Get live quote"}</button>
+                  <button type="button" className="swap-submit" onClick={runSwap} disabled={swapBusy || !connected || !swapAmount || Number(swapAmount) <= 0 || !swapQuote}><ArrowDownUp size={16} /> {swapBusy ? "Waiting for wallet…" : `Swap ${swapFrom} for ${swapFrom === "USDC" ? "EURC" : "USDC"}`}</button>
                   {swapStatus && <p className="swap-notice" role="status"><ShieldCheck size={15} /> {swapStatus}</p>}
                   <p className="swap-notice"><ShieldCheck size={15} /> Testnet only. Review the wallet request carefully. Swap availability depends on live routing and liquidity; no rate is guaranteed before submission.</p>
                 </div>
