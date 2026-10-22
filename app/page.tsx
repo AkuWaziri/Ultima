@@ -8,7 +8,11 @@ import {
   Zap, Landmark, Clock3, CircleCheck, SlidersHorizontal, Droplets
 } from "lucide-react";
 
-declare global { interface Window { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown>; on?: (event: string, handler: (...args: unknown[]) => void) => void; removeListener?: (event: string, handler: (...args: unknown[]) => void) => void } }
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  on?: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+};
 
 type Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
 
@@ -131,7 +135,7 @@ export default function Home() {
   const tokenAddresses = { USDC: "0x3600000000000000000000000000000000000000", EURC: "0x89b50855aa3be2f677cd6303cec089b5f319d72a" } as const;
 
   const refreshWalletBalances = async (address: string) => {
-    const provider = window.ethereum;
+    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) return;
     setBalancesLoading(true);
     try {
@@ -149,7 +153,7 @@ export default function Home() {
   };
 
   const connectWallet = async () => {
-    const provider = window.ethereum;
+    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) { setNotice("No compatible wallet found. Install MetaMask, Rabby, or another EVM wallet."); return; }
     try {
       try {
@@ -171,7 +175,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const provider = window.ethereum;
+    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider?.on) return;
     const onAccountsChanged = (...args: unknown[]) => {
       const accounts = args[0] as string[];
