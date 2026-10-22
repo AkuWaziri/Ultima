@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AppKit } from "@circle-fin/app-kit";
+import type { EarnVaultInfo } from "@circle-fin/app-kit";
+import { createViemAdapterFromProvider } from "@circle-fin/adapter-viem-v2";
+import type { CreateViemAdapterFromProviderParams } from "@circle-fin/adapter-viem-v2";
 import {
   Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, ArrowDownUp, Bell,
   ChevronDown, CircleHelp, Command, Compass, ExternalLink, Eye, EyeOff,
@@ -79,6 +83,36 @@ export default function Home() {
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState("");
   const [analysisError, setAnalysisError] = useState("");
+  const [liveVaults, setLiveVaults] = useState<EarnVaultInfo[]>([]);
+  const [vaultsLoading, setVaultsLoading] = useState(true);
+  const [selectedVaultAddress, setSelectedVaultAddress] = useState("");
+  const [earnAmount, setEarnAmount] = useState("1");
+  const [earnBusy, setEarnBusy] = useState(false);
+  const [earnStatus, setEarnStatus] = useState("");
+  const [earnPosition, setEarnPosition] = useState<unknown>(null);
+  const [swapBusy, setSwapBusy] = useState(false);
+  const [swapStatus, setSwapStatus] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadVaults = async () => {
+      setVaultsLoading(true);
+      try {
+        const result = await appKit.earn.exploreVaults({ chain: "Arc_Testnet", sortBy: "apy" });
+        const active = result.vaults.filter((vault) => vault.status === "active" && Boolean(vault.address) && vault.liquidityProfile?.status === "active");
+        if (!cancelled) {
+          setLiveVaults(active);
+          setSelectedVaultAddress((current) => current || active[0]?.address || "");
+        }
+      } catch {
+        if (!cancelled) setEarnStatus("Live testnet vault discovery is temporarily unavailable. Retry in a moment.");
+      } finally {
+        if (!cancelled) setVaultsLoading(false);
+      }
+    };
+    void loadVaults();
+    return () => { cancelled = true; };
+  }, []);
 
   const openNotificationSettings = () => {
     try {
@@ -191,6 +225,60 @@ export default function Home() {
     provider.on("chainChanged", onChainChanged);
     return () => { provider.removeListener?.("accountsChanged", onAccountsChanged); provider.removeListener?.("chainChanged", onChainChanged); };
   }, [refreshWalletBalances, walletAddress]);
+
+  const runSwap = async () => {
+    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
+    if (!provider || !walletAddress || !connected) { setSwapStatus("Connect your wallet first."); return; }
+    const amount = Number(swapAmount);
+    if (!Number.isFinite(amount) || amount <= 0) { setSwapStatus("Enter a valid amount greater than zero."); return; }
+    setSwapBusy(true); setSwapStatus("");
+    try {
+      const adapter = await createViemAdapterFromProvider({ provider });
+      const result = await appKit.swap({
+        from: { adapter, chain: "Arc_Testnet" },
+        tokenIn: swapFrom,
+        tokenOut: swapFrom === "USDC" ? "EURC" : "USDC",
+        amountIn: swapAmount,
+      });
+      const outcome = result as { txHash?: string; explorerUrl?: string; amountOut?: string };
+      setSwapStatus(outcome.explorerUrl ? `Swap submitted: ${outcome.explorerUrl}` : `Swap completed. Transaction: ${outcome.txHash ?? "confirmed by App Kit"}`);
+      await refreshWalletBalances(walletAddress);
+    } catch (error) {
+      setSwapStatus(error instanceof Error ? error.message : "Swap failed. Check testnet liquidity and try a smaller amount.");
+    } finally { setSwapBusy(false); }
+  };
+
+  const runEarnAction = async (action: "quote" | "deposit" | "position" | "withdraw") => {
+    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
+    if (!provider || !walletAddress || !connected) { setEarnStatus("Connect your wallet to use a testnet vault."); return; }
+    if (!selectedVaultAddress) { setEarnStatus("No active testnet vault is available for this asset."); return; }
+    const amount = Number(earnAmount);
+    if (action !== "position" && (!Number.isFinite(amount) || amount <= 0)) { setEarnStatus("Enter a valid amount greater than zero."); return; }
+    setEarnBusy(true); setEarnStatus("");
+    try {
+      const adapter = await createViemAdapterFromProvider({ provider });
+      let result: unknown;
+      if (action === "quote") result = await appKit.earn.getDepositQuote({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress, amount: earnAmount });
+      else if (action === "deposit") result = await appKit.earn.deposit({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress, amount: earnAmount });
+      else if (action === "position") {
+        result = await appKit.earn.getPosition({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress });
+        setEarnPosition(result);
+      } else result = await appKit.earn.withdraw({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress, amount: earnAmount });
+      const output = result as { txHash?: string; explorerUrl?: string; currentBalance?: string; pnl?: { totalYieldEarned?: string } };
+      if (action === "position") {
+        setEarnStatus("Position refreshed from the live testnet vault.");
+      } else if (action === "quote") {
+        setEarnStatus("Deposit quote ready. Review the quote details below before depositing.");
+        setEarnPosition(result);
+      } else {
+        setEarnStatus(output.explorerUrl ? `${action === "deposit" ? "Deposit" : "Withdrawal"} submitted: ${output.explorerUrl}` : `${action === "deposit" ? "Deposit" : "Withdrawal"} submitted. ${output.txHash ?? ""}`);
+        setEarnPosition(result);
+        await refreshWalletBalances(walletAddress);
+      }
+    } catch (error) {
+      setEarnStatus(error instanceof Error ? error.message : "The vault action failed. Check your balance and try again.");
+    } finally { setEarnBusy(false); }
+  };
 
   const navigate = (next: Section) => {
     setSection(next);
@@ -322,6 +410,16 @@ export default function Home() {
                   ))}
                 </div>
                 {vaults.some((vault) => vault.tags[0] === asset) ? <div className="data-note"><ShieldCheck size={16} /><span>Rates and vault safety checks will be shown only after live onchain verification. No estimated APY is presented as current.</span></div> : <div className="empty-state asset-empty"><div className="empty-icon"><Landmark size={20} /></div><strong>No {asset} strategies listed yet</strong><p>{asset} is supported by Ultima. Verified vault options will appear here once their onchain details are confirmed.</p></div>}
+                <section className="live-earn-panel">
+                  <div className="live-earn-heading"><div><div className="eyebrow">ARC TESTNET · LIVE DATA</div><h3>Try a real yield position</h3><p>Vaults and APYs are loaded from Circle Earn Kit. Deposits and withdrawals require wallet approval.</p></div><button className="live-earn-refresh" type="button" onClick={() => { setVaultsLoading(true); void appKit.earn.exploreVaults({ chain: "Arc_Testnet", sortBy: "apy" }).then((result) => { const active = result.vaults.filter((vault) => vault.status === "active" && Boolean(vault.address) && vault.liquidityProfile?.status === "active"); setLiveVaults(active); setSelectedVaultAddress((current) => current || active[0]?.address || ""); }).catch(() => setEarnStatus("Could not refresh vaults. Try again.")).finally(() => setVaultsLoading(false)); }}><Activity size={14} /> Refresh vaults</button></div>
+                  {vaultsLoading ? <div className="live-earn-empty">Loading active Arc Testnet vaults…</div> : liveVaults.length === 0 ? <div className="live-earn-empty"><ShieldCheck size={18} /><span>No active supported vaults were returned right now. Ultima will not invent APYs or enable deposits into unverified addresses.</span></div> : <>
+                    <div className="live-vault-list">{liveVaults.filter((vault) => vault.asset === asset).map((vault) => <button type="button" key={vault.address} className={selectedVaultAddress === vault.address ? "live-vault-option selected" : "live-vault-option"} onClick={() => setSelectedVaultAddress(vault.address)}><span className={`swap-coin ${vault.asset === "EURC" ? "eurc" : "usdc"}`}>{vault.asset === "EURC" ? "€" : "$"}</span><span className="live-vault-copy"><strong>{vault.name}</strong><small>{vault.protocol} · {vault.asset} · {vault.address?.slice(0, 6)}…{vault.address?.slice(-4)}</small></span><span className="live-vault-apy">{typeof vault.currentApy === "number" ? `${(vault.currentApy * 100).toFixed(2)}% APY` : "APY unavailable"}</span></button>)}</div>
+                    <div className="earn-actions-row"><label>Amount ({asset})<input type="number" min="0.000001" step="any" value={earnAmount} onChange={(event) => setEarnAmount(event.target.value)} /></label><div className="earn-action-buttons"><button type="button" onClick={() => runEarnAction("quote")} disabled={earnBusy || !selectedVaultAddress}>Preview deposit</button><button type="button" onClick={() => runEarnAction("deposit")} disabled={earnBusy || !selectedVaultAddress}>Deposit</button><button type="button" onClick={() => runEarnAction("position")} disabled={earnBusy || !selectedVaultAddress}>My position</button><button type="button" onClick={() => runEarnAction("withdraw")} disabled={earnBusy || !selectedVaultAddress}>Withdraw</button></div></div>
+                    {earnBusy && <div className="live-earn-status" role="status">Waiting for wallet or testnet response…</div>}
+                    {earnStatus && <div className="live-earn-status" role="status">{earnStatus}</div>}
+                    {earnPosition && <pre className="earn-result-json">{JSON.stringify(earnPosition, null, 2)}</pre>}
+                  </>}
+                </section>
               </section>
 
             </>
@@ -334,7 +432,7 @@ export default function Home() {
                 <div className="swap-card">
                   <div className="swap-card-heading"><div><h2>Swap tokens</h2><p>Choose the token you send and receive.</p></div><span className="swap-network"><span className="network-dot" /> Arc Testnet</span></div>
                   <div className="swap-token-box">
-                    <div className="swap-token-label"><span>You pay</span><span>Balance unavailable</span></div>
+                    <div className="swap-token-label"><span>You pay</span><span>Balance: {swapFrom === "USDC" ? (usdcBalance ?? "—") : (eurcBalance ?? "—")}</span></div>
                     <div className="swap-token-row">
                       <input type="number" min="0" step="any" inputMode="decimal" placeholder="0.00" value={swapAmount} onChange={(event) => setSwapAmount(event.target.value)} aria-label="Amount to swap" />
                       <button type="button" className="swap-token-select" aria-label={`Pay with ${swapFrom}`}><span className={`swap-coin ${swapFrom.toLowerCase()}`}>{swapFrom === "USDC" ? "$" : "€"}</span>{swapFrom}<ChevronDown size={15} /></button>
@@ -343,11 +441,11 @@ export default function Home() {
                   <button type="button" className="swap-direction" onClick={() => setSwapFrom((current) => current === "USDC" ? "EURC" : "USDC")} aria-label="Switch swap direction"><ArrowDownUp size={18} /></button>
                   <div className="swap-token-box swap-receive">
                     <div className="swap-token-label"><span>You receive</span><span>Estimated amount</span></div>
-                    <div className="swap-token-row"><div className="swap-estimate"> {swapAmount && Number(swapAmount) > 0 ? "Quote unavailable" : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
+                    <div className="swap-token-row"><div className="swap-estimate"> {swapAmount && Number(swapAmount) > 0 ? "Quote on submit" : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
                   </div>
                   <div className="swap-info-list">
                     <div><span>Network</span><strong>Arc Testnet</strong></div>
-                    <div><span>Exchange rate</span><strong>Unavailable until a live quote is connected</strong></div>
+                    <div><span>Exchange rate</span><strong>Live route quote generated by Circle App Kit at swap time</strong></div>
                     <div><span>Network fee</span><strong>Shown before confirmation</strong></div>
                   </div>
                   <button type="button" className="swap-submit" disabled><ArrowDownUp size={16} /> Swap unavailable</button>
