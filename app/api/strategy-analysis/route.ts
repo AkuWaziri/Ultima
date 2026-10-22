@@ -4,9 +4,16 @@ export const runtime = "nodejs";
 
 type Asset = "USDC" | "EURC";
 type RiskPreference = "conservative" | "balanced" | "growth";
+type VaultSnapshot = {
+  name: string;
+  protocol: string;
+  asset: Asset;
+  currentApy?: number | null;
+  status: string;
+};
 
 export async function POST(request: Request) {
-  let body: { asset?: Asset; riskPreference?: RiskPreference };
+  let body: { asset?: Asset; riskPreference?: RiskPreference; vaults?: VaultSnapshot[] };
   try {
     body = await request.json();
   } catch {
@@ -20,30 +27,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Choose USDC or EURC and a risk preference." }, { status: 400 });
   }
 
+  const vaults = Array.isArray(body.vaults) ? body.vaults.slice(0, 30).filter((vault) =>
+    vault && typeof vault.name === "string" &&
+    typeof vault.protocol === "string" &&
+    vault.asset === asset &&
+    typeof vault.status === "string"
+  ).map((vault) => ({
+    name: vault.name.slice(0, 120),
+    protocol: vault.protocol.slice(0, 80),
+    asset: vault.asset,
+    status: vault.status.slice(0, 40),
+    currentApy: typeof vault.currentApy === "number" && Number.isFinite(vault.currentApy)
+      ? vault.currentApy
+      : null,
+  })) : [];
+
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return NextResponse.json({
-      error: "AI analysis is not connected yet. Add GROQ_API_KEY to the Vercel project environment variables to enable it.",
+      error: "AI analysis is not connected yet. The app owner needs to add GROQ_API_KEY to the Vercel project environment variables.",
     }, { status: 503 });
   }
 
-  const candidates = asset === "USDC"
-    ? [
-        { name: "Galaxy USDC", provider: "Morpho vault", status: "candidate integration; not verified live" },
-        { name: "Keyrock Prime USDC", provider: "Morpho vault", status: "candidate integration; not verified live" },
-      ]
-    : [];
-
-  const systemPrompt = `You are Ultima's cautious stablecoin strategy analyst for Arc Mainnet (chain ID 5042). You analyze options; you never execute transactions or provide guarantees. Never invent APY, yield, TVL, liquidity, audits, risk scores, contract addresses, integrations, or live chain facts. The supplied candidates are unverified UI placeholders, not confirmed live vaults. No live APY, liquidity, audit, or contract verification data is available. If no candidates are supplied, clearly say no ${asset} strategies are currently listed in the app. Explain the next evidence needed before any deposit: verified contract and token addresses, current onchain APY methodology/history, liquidity/withdrawal constraints, permissions, audit/security evidence, and chain compatibility. Discuss general risks without claiming a specific candidate has or lacks a property. Tailor the analysis to the risk preference. Be concise, clear, useful, and non-promotional. End with a short 'Current status' sentence that says deposits should not be made through these unverified candidates.`;
-
-  const userPrompt = JSON.stringify({
-    asset,
-    network: "Arc Mainnet",
-    riskPreference,
-    verifiedLiveDataAvailable: false,
-    candidates,
-    task: "Write a structured strategy analysis with headings: Snapshot, Key trade-offs, What to verify, and Current status. Do not treat the candidate list as verified opportunities.",
-  });
+  const systemPrompt = `You are Ultima's cautious stablecoin strategy analyst for Arc Testnet (chain ID 5042002). The app is testnet-only. Analyze trade-offs; never execute transactions, recommend a guaranteed return, or imply testnet tokens have real-world value. The supplied vault snapshot is metadata discovered by the client from Circle Earn Kit and is not an independent security audit. Never invent APY, yield, TVL, liquidity, audits, risk scores, contract addresses, protocol integrations, or live chain facts. Only discuss a current APY when a numeric value is supplied; it is a variable snapshot, not a promise. If the supplied vault list is empty, clearly state that no active ${asset} vault is currently available from Circle Earn Kit on Arc Testnet. Discuss general smart-contract, liquidity, stablecoin, and withdrawal risks without claiming a specific vault has or lacks a property unless supplied metadata supports it. Tailor the explanation to the risk preference. Use headings: Snapshot, Key trade-offs, What to verify, and Testnet status. Be concise, clear, useful, and non-promotional. End by reminding the user to use testnet tokens only.`;
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -58,7 +64,17 @@ export async function POST(request: Request) {
         max_tokens: 700,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          {
+            role: "user",
+            content: JSON.stringify({
+              network: "Arc Testnet",
+              chainId: 5042002,
+              asset,
+              riskPreference,
+              discoveredVaults: vaults,
+              task: "Explain only the supplied testnet vault metadata and the evidence a user should review before interacting. Do not invent missing details.",
+            }),
+          },
         ],
       }),
       signal: AbortSignal.timeout(20000),
