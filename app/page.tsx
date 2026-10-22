@@ -407,7 +407,7 @@ export default function Home() {
               <div className="welcome-row">
                 <div>
                   
-                  <h1>Make your money<br className="mobile-break" /> <span>work smarter.</span></h1>
+                  <h1>Overview</h1>
                   
                 </div>
                 <div className="welcome-art" aria-hidden="true">
