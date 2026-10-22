@@ -363,7 +363,6 @@ export default function Home() {
 
         <div className="network-pill"><span className="network-dot" /> Arc Testnet <ChevronDown size={14} /></div>
 
-        <div className="nav-label">WORKSPACE</div>
         <nav className="primary-nav" aria-label="Main navigation">
           {navItems.map(({ label, icon: Icon }) => (
             <button key={label} className={`nav-item ${section === label ? "active" : ""}`} onClick={() => navigate(label)}>
