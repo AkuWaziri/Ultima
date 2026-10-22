@@ -514,13 +514,12 @@ export default function Home() {
           {section === "Strategies" && (
             <>
               <div className="subpage-heading"><div className="eyebrow"><Bot size={14} /> INTELLIGENCE</div><h1>Strategy <span>analyst.</span></h1><p>Compare risk trade-offs with Ultima Intelligence before making a decision.</p></div>
-              <div className="strategy-toolbar"><div className="search-box"><Search size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search strategies" aria-label="Search strategies" /></div><div className="filter-pill"><SlidersHorizontal size={15} /> {asset} on Arc <ChevronDown size={14} /></div></div>
               <section className="ai-strategy-panel" aria-labelledby="ai-strategy-title">
                 <div className="ai-panel-visual"><Bot size={24} /></div>
                 <div className="ai-panel-main">
                   <div className="eyebrow">ULTIMA INTELLIGENCE</div>
                   <h2 id="ai-strategy-title">AI strategy analyst</h2>
-                  <p>Compare the trade-offs for USDC or EURC strategies on Arc, based on the information currently available. This does not execute transactions.</p>
+                  <p>Explore yield strategy trade-offs for USDC or EURC on Arc. Analysis supports your decision; it does not execute transactions or guarantee returns.</p>
                   <div className="ai-panel-controls">
                     <label>Asset
                       <select value={asset} onChange={(event) => { setAsset(event.target.value as "USDC" | "EURC"); setAnalysisResult(""); setAnalysisError(""); }}>
@@ -539,16 +538,11 @@ export default function Home() {
                       <Bot size={16} /> {analysisLoading ? "Analyzing…" : "Analyze strategies"}
                     </button>
                   </div>
-                  <div className="ai-safety-note"><ShieldCheck size={15} /> Candidate integrations only. Live APY, liquidity, audits and contract details are not yet verified.</div>
+                  <div className="ai-safety-note"><ShieldCheck size={15} /> Analysis may include general guidance. Treat APYs, liquidity, protocol safety, and other figures as unverified unless explicitly backed by live data.</div>
                   {analysisError && <div className="ai-result ai-result-error" role="alert">{analysisError}</div>}
                   {analysisResult && <div className="ai-result" role="status">{analysisResult}</div>}
                 </div>
               </section>
-              <div className="strategy-grid full-strategy-grid">
-                {filteredVaults.map((vault) => <StrategyCard key={vault.name} vault={vault} onExplore={() => setNotice("Live vault verification and deposit integration are the next build step.")} />)}
-              </div>
-              {filteredVaults.length === 0 && <div className="empty-state"><div className="empty-icon"><Search size={20} /></div><strong>{asset === "EURC" ? "No EURC strategies listed yet" : "No strategies found"}</strong><p>{asset === "EURC" ? "EURC is supported in Ultima. Strategy options will appear after eligible Arc vaults are verified." : "Try a different name."}</p></div>}
-              <div className="data-note"><ShieldCheck size={16} /><span>These are candidate integrations, not live yield offers. Rates, liquidity, vault permissions and contract details must be verified before deposits are enabled.</span></div>
             </>
           )}
 
