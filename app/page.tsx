@@ -148,7 +148,7 @@ export default function Home() {
           {navItems.map(({ label, icon: Icon }) => (
             <button key={label} className={`nav-item ${section === label ? "active" : ""}`} onClick={() => navigate(label)}>
               <Icon size={18} strokeWidth={1.9} /><span>{label}</span>
-              {label === "Strategies" && <span className="nav-count">2</span>}
+              {label === "Explore" && <span className="nav-count">2</span>}
             </button>
           ))}
         </nav>
