@@ -907,3 +907,7 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .earn-result-json{margin:10px 0 0;padding:12px;border:1px solid #e3dcf5;border-radius:10px;background:#fff;color:#5e5378;font-size:9px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow:auto}
 .swap-notice{overflow-wrap:anywhere}
 @media(max-width:620px){.live-earn-panel{padding:14px}.live-earn-heading{flex-direction:column}.earn-actions-row{grid-template-columns:1fr}.earn-action-buttons{display:grid;grid-template-columns:1fr 1fr}.live-vault-option{align-items:flex-start}.live-vault-apy{font-size:9px}}
+
+
+.swap-quote-button{width:100%;display:flex;justify-content:center;align-items:center;border:1px solid #d6c8f6;border-radius:12px;padding:12px;background:#fff;color:#5f45bb;font-size:11px;font-weight:800;margin:12px 0 8px}
+.swap-quote-button:disabled{opacity:.5;cursor:not-allowed}
