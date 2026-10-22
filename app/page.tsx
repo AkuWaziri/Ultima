@@ -427,11 +427,6 @@ export default function Home() {
                   <div className="balance-decoration"><div /><div /><div /></div>
                 </div>
                 <div className="metric-card token-balance-card">
-                  <div className="metric-top"><span>USDC balance</span><span className="metric-icon mint">$</span></div>
-                  <div className="metric-value">{showBalance ? (balancesLoading ? "Loading…" : usdcBalance ?? "—") : "••••••"}</div>
-                  <div className="metric-foot">{walletAddress ? "ERC-20 balance on Arc Testnet" : "Connect wallet to load balance"}</div>
-                </div>
-                <div className="metric-card token-balance-card">
                   <div className="metric-top"><span>EURC balance</span><span className="metric-icon lavender">€</span></div>
                   <div className="metric-value">{showBalance ? (balancesLoading ? "Loading…" : eurcBalance ?? "—") : "••••••"}</div>
                   <div className="metric-foot">{walletAddress ? "ERC-20 balance on Arc Testnet" : "Connect wallet to load balance"}</div>
