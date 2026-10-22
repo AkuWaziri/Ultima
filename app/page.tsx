@@ -572,7 +572,7 @@ export default function Home() {
 
           {section === "My positions" && (
             <>
-              <div className="subpage-heading"><div className="eyebrow"><Wallet size={14} /> YOUR PORTFOLIO</div><h1>All your positions, <span>in one place.</span></h1><p>Read live position balances from the active Circle Earn Kit vaults on Arc Testnet.</p></div>
+              <div className="subpage-heading"><div className="eyebrow"><Wallet size={14} /> YOUR PORTFOLIO</div><h1>All your positions, <span>in one place.</span></h1></div>
               <div className="positions-toolbar">
                 <button className="connect-button" onClick={() => void refreshAllPositions()} disabled={!connected || walletChainId !== 5042002 || positionsLoading}>
                   <Activity size={16} /> {positionsLoading ? "Checking positions…" : "Refresh positions"}
