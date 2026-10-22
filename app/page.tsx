@@ -207,14 +207,17 @@ export default function Home() {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) { setNotice("No compatible wallet found. Install MetaMask, Rabby, or another EVM wallet."); return; }
     try {
+      // Wallet RPC methods are broader than viem's typed provider method union.
+      // Keep this local cast limited to the EIP-1193 network-setup calls.
+      const walletRpc = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
       try {
-        await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_TESTNET.chainId }] });
+        await walletRpc.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_TESTNET.chainId }] });
       } catch (switchError) {
         if ((switchError as { code?: number })?.code !== 4902) throw switchError;
-        await provider.request({ method: "wallet_addEthereumChain", params: [ARC_TESTNET] });
+        await walletRpc.request({ method: "wallet_addEthereumChain", params: [{ ...ARC_TESTNET, rpcUrls: [...ARC_TESTNET.rpcUrls], blockExplorerUrls: [...ARC_TESTNET.blockExplorerUrls] }] });
       }
-      const accounts = await provider.request({ method: "eth_requestAccounts" }) as string[];
-      const chainHex = await provider.request({ method: "eth_chainId" }) as string;
+      const accounts = await walletRpc.request({ method: "eth_requestAccounts" }) as string[];
+      const chainHex = await walletRpc.request({ method: "eth_chainId" }) as string;
       const address = accounts?.[0];
       const chainId = Number.parseInt(chainHex, 16);
       if (!address) { setNotice("No wallet account was selected."); return; }
