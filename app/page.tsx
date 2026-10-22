@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, ArrowDownUp, Bell,
   ChevronDown, CircleHelp, Command, Compass, ExternalLink, Eye, EyeOff,
@@ -53,7 +53,6 @@ export default function Home() {
   const [swapAmount, setSwapAmount] = useState("");
   const [connected, setConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
-  const [walletChainId, setWalletChainId] = useState<number | null>(null);
   const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const [eurcBalance, setEurcBalance] = useState<string | null>(null);
   const [balancesLoading, setBalancesLoading] = useState(false);
@@ -134,7 +133,7 @@ export default function Home() {
   const arcTestnet = { chainId: "0x4cef52", chainName: "Arc Testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: ["https://rpc.testnet.arc.io"], blockExplorerUrls: ["https://explorer.testnet.arc.io"] } as const;
   const tokenAddresses = { USDC: "0x3600000000000000000000000000000000000000", EURC: "0x89b50855aa3be2f677cd6303cec089b5f319d72a" } as const;
 
-  const refreshWalletBalances = async (address: string) => {
+  const refreshWalletBalances = useCallback(async (address: string) => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) return;
     setBalancesLoading(true);
@@ -150,7 +149,7 @@ export default function Home() {
     } catch {
       setNotice("Could not read token balances. Check your Arc Testnet connection and retry.");
     } finally { setBalancesLoading(false); }
-  };
+  }, []);
 
   const connectWallet = async () => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
@@ -168,7 +167,7 @@ export default function Home() {
       const chainId = Number.parseInt(chainHex, 16);
       if (!address) { setNotice("No wallet account was selected."); return; }
       if (chainId !== 5042002) { setNotice("Switch your wallet to Arc Testnet to continue."); return; }
-      setWalletAddress(address); setWalletChainId(chainId); setConnected(true);
+      setWalletAddress(address); setConnected(true);
       setNotice("Wallet connected to Arc Testnet.");
       await refreshWalletBalances(address);
     } catch { setNotice("Wallet connection was cancelled or failed. Try again."); }
@@ -180,19 +179,18 @@ export default function Home() {
     const onAccountsChanged = (...args: unknown[]) => {
       const accounts = args[0] as string[];
       if (!accounts?.[0]) {
-        setConnected(false); setWalletAddress(""); setUsdcBalance(null); setEurcBalance(null); setWalletChainId(null);
+        setConnected(false); setWalletAddress(""); setUsdcBalance(null); setEurcBalance(null);
       } else { setWalletAddress(accounts[0]); setConnected(true); void refreshWalletBalances(accounts[0]); }
     };
     const onChainChanged = (...args: unknown[]) => {
       const chainId = Number.parseInt(String(args[0]), 16);
-      setWalletChainId(chainId);
       if (chainId !== 5042002) { setNotice("Ultima is configured for Arc Testnet. Switch networks to continue."); setUsdcBalance(null); setEurcBalance(null); }
       else if (walletAddress) void refreshWalletBalances(walletAddress);
     };
     provider.on("accountsChanged", onAccountsChanged);
     provider.on("chainChanged", onChainChanged);
     return () => { provider.removeListener?.("accountsChanged", onAccountsChanged); provider.removeListener?.("chainChanged", onChainChanged); };
-  }, [walletAddress]);
+  }, [refreshWalletBalances, walletAddress]);
 
   const navigate = (next: Section) => {
     setSection(next);
@@ -504,7 +502,7 @@ export default function Home() {
             <div className="faucet-modal-head"><div className="faucet-modal-icon"><Droplets size={22} /></div><button className="icon-button" type="button" aria-label="Close faucet" onClick={() => setFaucetOpen(false)}><X size={18} /></button></div>
             <div className="eyebrow">ARC TESTNET FAUCET</div><h2 id="faucet-title">Get 1,000 USDC</h2><p className="faucet-modal-intro">One claim per wallet every 24 hours.</p>
             <div className="faucet-claim-summary"><span>Claim amount</span><strong>1,000 USDC</strong><span>Cooldown</span><strong>24 hours per wallet</strong><span>Network</span><strong>Arc Mainnet</strong></div>
-            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. The custom 1,000 USDC per-wallet faucet requires a separately funded contract; use Circle’s official faucet for now.</span></div>
+            <div className="faucet-warning"><ShieldCheck size={17} /><span>This is testnet USDC with no real-world value. The custom 1,000 USDC per-wallet faucet requires a separately funded contract; use Circle&apos;s official faucet for now.</span></div>
             <a className="faucet-claim-button" href="https://faucet.circle.com/" target="_blank" rel="noreferrer"><Droplets size={16} /> Get testnet USDC <ExternalLink size={14} /></a>
           </section>
         </div>
