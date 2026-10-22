@@ -1016,3 +1016,22 @@ button:disabled{cursor:not-allowed;opacity:.58}
   .footer-social{width:26px;height:26px;border-radius:8px}
   .footer-social svg{width:13px;height:13px}
 }
+
+
+/* ATM-card sized vault tiles with distinct USDC/EURC colour treatments */
+.live-vault-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px}
+.live-vault-option{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;align-items:start;gap:15px 12px;min-height:170px;padding:20px;border-radius:20px;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.live-vault-option:hover{transform:translateY(-2px);box-shadow:0 12px 26px #34205d12}
+.live-vault-option .swap-coin{width:42px;height:42px;display:grid;place-items:center;font-size:20px;border-radius:14px}
+.live-vault-copy{align-self:center;gap:6px}
+.live-vault-copy strong{font-size:15px;line-height:1.35}
+.live-vault-copy small{font-size:11px;line-height:1.45}
+.live-vault-apy{grid-column:1/-1;display:flex;align-items:end;justify-content:space-between;gap:10px;margin:0;white-space:normal;font-size:21px;line-height:1.2}
+.live-vault-apy small{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700}
+.live-vault-option:has(.swap-coin.usdc){background:linear-gradient(135deg,#f0f6ff 0%,#dceaff 100%);border-color:#b7d2ff;color:#214e89}
+.live-vault-option:has(.swap-coin.usdc) .live-vault-apy{color:#155db5}
+.live-vault-option:has(.swap-coin.usdc).selected{background:linear-gradient(135deg,#e0edff 0%,#c7deff 100%);border-color:#4c8ce5;box-shadow:0 0 0 2px #8db8f5 inset}
+.live-vault-option:has(.swap-coin.eurc){background:linear-gradient(135deg,#edfcf5 0%,#cff5e4 100%);border-color:#a8e5cb;color:#17664f}
+.live-vault-option:has(.swap-coin.eurc) .live-vault-apy{color:#087c61}
+.live-vault-option:has(.swap-coin.eurc).selected{background:linear-gradient(135deg,#d7f8e9 0%,#b9efd8 100%);border-color:#35ad86;box-shadow:0 0 0 2px #8bdabb inset}
+@media(max-width:700px){.live-vault-list{grid-template-columns:1fr;gap:11px}.live-vault-option{min-height:158px;padding:17px;border-radius:17px}.live-vault-apy{font-size:20px}}
