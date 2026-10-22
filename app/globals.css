@@ -911,3 +911,13 @@ button:disabled{cursor:not-allowed;opacity:.58}
 
 .swap-quote-button{width:100%;display:flex;justify-content:center;align-items:center;border:1px solid #d6c8f6;border-radius:12px;padding:12px;background:#fff;color:#5f45bb;font-size:11px;font-weight:800;margin:12px 0 8px}
 .swap-quote-button:disabled{opacity:.5;cursor:not-allowed}
+
+
+.activity-record-list{display:grid}
+.activity-record{display:flex;align-items:center;gap:12px;padding:14px 18px;border-top:1px solid #efebf8}
+.activity-record-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#eee8ff;color:#6545d5;flex-shrink:0}
+.activity-record-main{display:grid;gap:5px;min-width:0}
+.activity-record-main strong{font-size:11px;color:#443464}
+.activity-record-main span{font-size:9px;color:#8b819e}
+.activity-record-amount{margin-left:auto;font-size:11px;font-weight:800;color:#57418f;white-space:nowrap}
+.activity-record>a{display:grid;place-items:center;color:#7662b8}
