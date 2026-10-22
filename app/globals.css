@@ -921,3 +921,21 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .activity-record-main span{font-size:9px;color:#8b819e}
 .activity-record-amount{margin-left:auto;font-size:11px;font-weight:800;color:#57418f;white-space:nowrap}
 .activity-record>a{display:grid;place-items:center;color:#7662b8}
+
+
+/* Distinct, consistent colours for each testnet vault and asset tab */
+.live-vault-option{transition:background .18s ease,border-color .18s ease,box-shadow .18s ease}
+.live-vault-option:focus-visible{outline:2px solid #262626;outline-offset:2px}
+.live-vault-option .swap-coin.usdc{background:#d9eaff!important;color:#1764b5!important;border:1px solid #a9ceff}
+.live-vault-option .swap-coin.eurc{background:#d9f7e9!important;color:#087c61!important;border:1px solid #9ce4c9}
+.live-vault-option:has(.swap-coin.usdc){background:#f4f8ff;border-color:#c7dcff;color:#234c80}
+.live-vault-option:has(.swap-coin.usdc) .live-vault-apy{color:#1764b5}
+.live-vault-option:has(.swap-coin.usdc).selected{background:#e5f0ff;border-color:#5e9ce8;box-shadow:0 0 0 1px #a9ceff inset}
+.live-vault-option:has(.swap-coin.eurc){background:#f0fcf7;border-color:#b9ead8;color:#176b57}
+.live-vault-option:has(.swap-coin.eurc) .live-vault-apy{color:#087c61}
+.live-vault-option:has(.swap-coin.eurc).selected{background:#dcf8ec;border-color:#48b995;box-shadow:0 0 0 1px #9ce4c9 inset}
+.asset-tab:has(.token-usdc){--tab-accent:#1764b5;--tab-soft:#e5f0ff}
+.asset-tab:has(.token-eurc){--tab-accent:#087c61;--tab-soft:#dcf8ec}
+.asset-tab:has(.token-usdc).selected,.asset-tab:has(.token-eurc).selected{border-color:var(--tab-accent);background:var(--tab-soft);color:var(--tab-accent)}
+.asset-tab:has(.token-usdc) .token-usdc{background:#d9eaff;color:#1764b5}
+.asset-tab:has(.token-eurc) .token-eurc{background:#d9f7e9;color:#087c61}
