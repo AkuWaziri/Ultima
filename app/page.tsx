@@ -14,6 +14,8 @@ import {
 
 type EthereumProvider = CreateViemAdapterFromProviderParams["provider"];
 
+type UltimaTransaction = { id: string; action: string; asset: string; amount: string; txHash: string; explorerUrl: string; createdAt: string };
+
 type Section = "Dashboard" | "Explore" | "Swap" | "Strategies" | "My positions" | "Activity";
 
 const navItems: { label: Section; icon: typeof LayoutDashboard }[] = [
@@ -89,6 +91,15 @@ export default function Home() {
   const [swapBusy, setSwapBusy] = useState(false);
   const [swapStatus, setSwapStatus] = useState("");
   const [swapQuote, setSwapQuote] = useState<{ amountOut: string; effectiveRate: string } | null>(null);
+  const [txHistory, setTxHistory] = useState<UltimaTransaction[]>([]);
+  const [yieldEarned, setYieldEarned] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("ultima-testnet-transactions");
+      if (saved) setTxHistory(JSON.parse(saved) as UltimaTransaction[]);
+    } catch { /* Ignore malformed local history. */ }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -259,6 +270,7 @@ export default function Home() {
       });
       const outcome = result as { txHash?: string; explorerUrl?: string; amountOut?: string };
       setSwapStatus(outcome.explorerUrl ? `Swap submitted: ${outcome.explorerUrl}` : `Swap completed. Transaction: ${outcome.txHash ?? "confirmed by App Kit"}`);
+      if (outcome.txHash) recordTransaction({ action: "Swap", asset: `${swapFrom} → ${swapFrom === "USDC" ? "EURC" : "USDC"}`, amount: swapAmount, txHash: outcome.txHash, explorerUrl: outcome.explorerUrl ?? `https://explorer.testnet.arc.io/tx/${outcome.txHash}` });
       setSwapQuote(null);
       await refreshWalletBalances(walletAddress);
     } catch (error) {
@@ -291,11 +303,26 @@ export default function Home() {
       } else {
         setEarnStatus(output.explorerUrl ? `${action === "deposit" ? "Deposit" : "Withdrawal"} submitted: ${output.explorerUrl}` : `${action === "deposit" ? "Deposit" : "Withdrawal"} submitted. ${output.txHash ?? ""}`);
         setEarnPosition(result);
+        const tx = result as { txHash?: string; explorerUrl?: string };
+        if (tx.txHash) recordTransaction({ action: action === "deposit" ? "Deposit" : "Withdraw", asset, amount: earnAmount, txHash: tx.txHash, explorerUrl: tx.explorerUrl ?? `https://explorer.testnet.arc.io/tx/${tx.txHash}` });
+        const adapterForPosition = await createViemAdapterFromProvider({ provider });
+        const updatedPosition = await appKit.earn.getPosition({ from: { adapter: adapterForPosition, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress });
+        setEarnPosition(updatedPosition);
+        setYieldEarned((updatedPosition as { pnl?: { totalYieldEarned?: string } }).pnl?.totalYieldEarned ?? null);
         await refreshWalletBalances(walletAddress);
       }
     } catch (error) {
       setEarnStatus(error instanceof Error ? error.message : "The vault action failed. Check your balance and try again.");
     } finally { setEarnBusy(false); }
+  };
+
+  const recordTransaction = (record: Omit<UltimaTransaction, "id" | "createdAt">) => {
+    const entry: UltimaTransaction = { ...record, id: `${record.txHash}-${Date.now()}`, createdAt: new Date().toISOString() };
+    setTxHistory((current) => {
+      const next = [entry, ...current].slice(0, 50);
+      try { window.localStorage.setItem("ultima-testnet-transactions", JSON.stringify(next)); } catch { /* Keep the in-memory history. */ }
+      return next;
+    });
   };
 
   const navigate = (next: Section) => {
@@ -396,7 +423,7 @@ export default function Home() {
                 </div>
                 <div className="metric-card">
                   <div className="metric-top"><span>Yield earned</span><span className="metric-icon mint"><Activity size={16} /></span></div>
-                  <div className="metric-value">$<span className="zero">0.00</span></div>
+                  <div className="metric-value">$<span className="zero">{yieldEarned ?? "—"}</span></div>
                   <div className="metric-foot"><span className="subtle-pill">Ready when you are</span></div>
                 </div>
                 <div className="metric-card">
@@ -529,7 +556,7 @@ export default function Home() {
               <div className="subpage-heading"><div className="eyebrow"><Activity size={14} /> TRANSACTION HISTORY</div><h1>Your activity, <span>clearly tracked.</span></h1><p>Deposits, withdrawals and contract interactions will be listed here.</p></div>
               <div className="activity-table panel">
                 <div className="table-head"><span>TRANSACTION</span><span>NETWORK</span><span>STATUS</span><span>DATE</span></div>
-                <div className="empty-state"><div className="empty-icon"><Clock3 size={20} /></div><strong>No transactions yet</strong><p>Your Arc transactions will appear here after you interact with a strategy.</p></div>
+                {txHistory.length === 0 ? <div className="empty-state"><div className="empty-icon"><Clock3 size={20} /></div><strong>No testnet transactions yet</strong><p>Successful swaps, deposits and withdrawals made through Ultima will appear here on this device.</p></div> : <div className="activity-record-list">{txHistory.map((tx) => <div className="activity-record" key={tx.id}><div className="activity-record-icon"><ArrowUpRight size={16} /></div><div className="activity-record-main"><strong>{tx.action} · {tx.asset}</strong><span>{new Date(tx.createdAt).toLocaleString()}</span></div><div className="activity-record-amount">{tx.amount}</div><a href={tx.explorerUrl} target="_blank" rel="noreferrer" aria-label="View transaction on Arc Testnet explorer"><ExternalLink size={15} /></a></div>)}</div>
               </div>
             </>
           )}
