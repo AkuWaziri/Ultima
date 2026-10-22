@@ -1054,3 +1054,18 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .live-vault-option:nth-child(6n) .live-vault-apy{color:#087985}
 .live-vault-option.selected{box-shadow:0 0 0 2px currentColor inset,0 8px 20px rgba(37,33,62,.1)}
 @media(max-width:700px){.live-vault-list{grid-template-columns:1fr;gap:12px}.live-vault-option{min-height:158px;padding:17px}}
+
+
+/* Final override: colour vault cards by their position, not by token type */
+.live-vault-list>.live-vault-option:nth-child(6n+1){background:linear-gradient(135deg,#edf4ff 0%,#d6e6ff 100%)!important;border-color:#b4cefa!important;color:#214e89!important}
+.live-vault-list>.live-vault-option:nth-child(6n+2){background:linear-gradient(135deg,#e9fbf3 0%,#c9f1df 100%)!important;border-color:#a3dfc3!important;color:#17664f!important}
+.live-vault-list>.live-vault-option:nth-child(6n+3){background:linear-gradient(135deg,#fff3e7 0%,#ffe0c3 100%)!important;border-color:#f2c69c!important;color:#8b4c20!important}
+.live-vault-list>.live-vault-option:nth-child(6n+4){background:linear-gradient(135deg,#f8edff 0%,#e9d5ff 100%)!important;border-color:#d4b4f1!important;color:#693b91!important}
+.live-vault-list>.live-vault-option:nth-child(6n+5){background:linear-gradient(135deg,#fff0f2 0%,#ffd9df 100%)!important;border-color:#f2b8c3!important;color:#963c52!important}
+.live-vault-list>.live-vault-option:nth-child(6n){background:linear-gradient(135deg,#e8fbfc 0%,#c9f0f2 100%)!important;border-color:#a0dfe3!important;color:#17636b!important}
+.live-vault-list>.live-vault-option:nth-child(6n+1) .live-vault-apy{color:#155db5!important}
+.live-vault-list>.live-vault-option:nth-child(6n+2) .live-vault-apy{color:#087c61!important}
+.live-vault-list>.live-vault-option:nth-child(6n+3) .live-vault-apy{color:#a45a20!important}
+.live-vault-list>.live-vault-option:nth-child(6n+4) .live-vault-apy{color:#7a42ad!important}
+.live-vault-list>.live-vault-option:nth-child(6n+5) .live-vault-apy{color:#b3425c!important}
+.live-vault-list>.live-vault-option:nth-child(6n) .live-vault-apy{color:#087985!important}
