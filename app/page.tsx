@@ -465,8 +465,8 @@ export default function Home() {
                 </div>
                 <div className="metric-card">
                   <div className="metric-top"><span>Active positions</span><span className="metric-icon peach"><Landmark size={16} /></span></div>
-                  <div className="metric-value"><span className="zero">—</span></div>
-                  <div className="metric-foot">Position count is not indexed yet</div>
+                  <div className="metric-value">{positionsChecked ? walletPositions.length : <span className="zero">—</span>}</div>
+                  <div className="metric-foot">Refresh positions to load live count</div>
                 </div>
               </div>
 
