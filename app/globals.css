@@ -752,8 +752,8 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .topbar .icon-button:hover{background:#dccbff;color:#4328ad}
 .topbar .connect-button{background:#6545d5;color:#fff}
 .topbar .connect-button:hover{background:#5133c2}
-.brand-mark .paper-u{fill:#6545d5 !important}
-.brand-mark .u-red-dot{fill:#8b72ef !important;stroke:#e9ddff !important}
+.brand-mark .paper-u{fill:#171717 !important}
+.brand-mark .u-red-dot{fill:#ff2038 !important;stroke:#e9ddff !important}
 .brand-name{color:#49318f}
 .mobile-brand .brand-name{color:#49318f}
 .footer-brand strong{color:#49318f}
