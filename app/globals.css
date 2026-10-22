@@ -875,3 +875,8 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .faucet-claim-button{width:100%;display:flex;justify-content:center;align-items:center;gap:8px;border:0;border-radius:13px;padding:14px;background:#6545d5;color:#fff;font-size:12px;font-weight:800}
 .faucet-claim-button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:520px){.faucet-mini-tab{gap:9px;padding:12px}.faucet-mini-icon{width:34px;height:34px}.faucet-mini-copy small{max-width:130px;line-height:1.4}.faucet-mini-amount{gap:4px;padding:8px 7px;font-size:9px}.faucet-modal{padding:19px}}
+
+
+/* Live wallet balances and testnet status */
+.token-balance-card .metric-value{font-size:clamp(20px,2.3vw,28px);overflow-wrap:anywhere}
+.faucet-claim-button{text-decoration:none}
