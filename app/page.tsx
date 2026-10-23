@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppKit } from "@circle-fin/app-kit";
 import type { EarnVaultInfo } from "@circle-fin/app-kit";
 import { createViemAdapterFromProvider } from "@circle-fin/adapter-viem-v2";
-import { createPublicClient, decodeFunctionResult, encodeFunctionData, formatUnits, http, isAddress, parseUnits } from "viem";
+import { createPublicClient, createWalletClient, custom, decodeFunctionResult, encodeFunctionData, formatUnits, http, isAddress, parseUnits } from "viem";
 import type { CreateViemAdapterFromProviderParams } from "@circle-fin/adapter-viem-v2";
 import {
   Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, ArrowDownUp, Bell,
@@ -32,6 +32,17 @@ const navItems: { label: Section; icon: typeof LayoutDashboard }[] = [
 
 const ARC_TESTNET = { chainId: "0x4cef52", chainName: "Arc Testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: ["https://rpc.testnet.arc.io"], blockExplorerUrls: ["https://explorer.testnet.arc.io"] } as const;
 const TOKEN_ADDRESSES = { USDC: "0x3600000000000000000000000000000000000000", EURC: "0x89b50855aa3be2f677cd6303cec089b5f319d72a" } as const;
+const ARC_V2_ROUTER = "0xe27d5d256b370604f1ff060fb489c6a8e3f8a6d9" as const;
+const arcSwapChain = { id: 5042002, name: "Arc Testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: { default: { http: ["/api/arc-rpc"] } } } as const;
+const swapRouterAbi = [
+  { type: "function", name: "getAmountsOut", stateMutability: "view", inputs: [{ name: "amountIn", type: "uint256" }, { name: "path", type: "address[]" }], outputs: [{ name: "amounts", type: "uint256[]" }] },
+  { type: "function", name: "swapExactTokensForTokens", stateMutability: "nonpayable", inputs: [{ name: "amountIn", type: "uint256" }, { name: "amountOutMin", type: "uint256" }, { name: "path", type: "address[]" }, { name: "to", type: "address" }, { name: "deadline", type: "uint256" }], outputs: [{ name: "amounts", type: "uint256[]" }] },
+] as const;
+const swapTokenAbi = [
+  { type: "function", name: "allowance", stateMutability: "view", inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+  { type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
+] as const;
+const arcSwapPublicClient = createPublicClient({ chain: arcSwapChain, transport: http("/api/arc-rpc") });
 
 export default function Home() {
   const [section, setSection] = useState<Section>("Dashboard");
@@ -292,31 +303,32 @@ export default function Home() {
   }, [refreshWalletBalances, walletAddress]);
 
   const getSwapQuote = useCallback(async () => {
-    const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
-    if (!provider || !walletAddress || !connected || walletChainId !== 5042002) { setSwapStatus("Connect your wallet to Arc Testnet first."); return; }
-    if (!swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) { setSwapStatus("Enter a valid amount greater than zero."); return; }
+    if (!walletAddress || !connected || walletChainId !== 5042002) { setSwapStatus("Connect your wallet to Arc Testnet first."); return; }
+    if (!swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) { setSwapQuote(null); setSwapStatus("Enter a valid amount greater than zero."); return; }
     setSwapBusy(true); setSwapStatus(""); setSwapQuote(null);
     try {
-      const adapter = await createViemAdapterFromProvider({ provider });
-      const result = await appKit.estimateSwap({
-        from: { adapter, chain: "Arc_Testnet" },
-        tokenIn: swapFrom,
-        tokenOut: swapFrom === "USDC" ? "EURC" : "USDC",
-        amountIn: swapAmount,
+      const tokenIn = TOKEN_ADDRESSES[swapFrom];
+      const tokenOut = TOKEN_ADDRESSES[swapFrom === "USDC" ? "EURC" : "USDC"];
+      const amountIn = parseUnits(swapAmount, 6);
+      const amounts = await arcSwapPublicClient.readContract({
+        address: ARC_V2_ROUTER, abi: swapRouterAbi, functionName: "getAmountsOut", args: [amountIn, [tokenIn, tokenOut]],
       });
-      const amountOut = Number(result.estimatedOutput.amount);
-      if (!Number.isFinite(amountOut) || amountOut <= 0) throw new Error("No valid live quote was returned for this swap direction.");
-      const outputAsset = swapFrom === "USDC" ? "EURC" : "USDC";
-      const formattedOutput = amountOut.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6, useGrouping: false });
-      setSwapQuote({ amountOut: formattedOutput, effectiveRate: (amountOut / Number(swapAmount)).toFixed(6) });
-      setSwapStatus(`Quote ready: ${swapAmount} ${swapFrom} → ${formattedOutput} ${outputAsset}.`);
+      const amountOut = amounts[amounts.length - 1];
+      if (!amountOut || amountOut <= 0n) throw new Error("No usable USDC/EURC liquidity is available for this amount.");
+      const formattedOutput = Number(formatUnits(amountOut, 6)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6, useGrouping: false });
+      const rate = Number(formatUnits(amountOut, 6)) / Number(swapAmount);
+      setSwapQuote({ amountOut: formattedOutput, effectiveRate: rate.toFixed(6) });
+      setSwapStatus(`Live Arc Testnet pool quote: ${swapAmount} ${swapFrom} → ${formattedOutput} ${swapFrom === "USDC" ? "EURC" : "USDC"}.`);
     } catch (error) {
-      setSwapStatus(error instanceof Error ? error.message : "A live quote is unavailable. Try a smaller amount or retry later.");
+      setSwapQuote(null);
+      setSwapStatus(error instanceof Error && /revert|execution reverted|insufficient_output_amount/i.test(error.message)
+        ? "No route or insufficient liquidity is available for this amount on Arc Testnet."
+        : error instanceof Error ? `Could not fetch the on-chain quote: ${error.message}` : "Could not fetch a live on-chain quote. Retry shortly.");
     } finally { setSwapBusy(false); }
   }, [walletAddress, connected, walletChainId, swapAmount, swapFrom]);
 
   useEffect(() => {
-    if (section !== "Swap" || !connected || walletChainId !== 5042002 || !swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) return;
+    if (section !== "Swap" || !connected || walletChainId !== 5042002 || !swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) { setSwapQuote(null); return; }
     const timer = window.setTimeout(() => { void getSwapQuote(); }, 500);
     return () => window.clearTimeout(timer);
   }, [section, connected, walletChainId, swapAmount, swapFrom, getSwapQuote]);
@@ -324,27 +336,45 @@ export default function Home() {
   const runSwap = async () => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider || !walletAddress || !connected) { setSwapStatus("Connect your wallet first."); return; }
+    if (walletChainId !== 5042002) { setSwapStatus("Switch your wallet to Arc Testnet before swapping."); return; }
     const amount = Number(swapAmount);
     if (!Number.isFinite(amount) || amount <= 0) { setSwapStatus("Enter a valid amount greater than zero."); return; }
     setSwapBusy(true); setSwapStatus("");
     try {
-      const adapter = await createViemAdapterFromProvider({ provider });
-      const result = await appKit.swap({
-        from: { adapter, chain: "Arc_Testnet" },
-        tokenIn: swapFrom,
-        tokenOut: swapFrom === "USDC" ? "EURC" : "USDC",
-        amountIn: swapAmount,
+      const account = walletAddress as `0x${string}`;
+      const tokenIn = TOKEN_ADDRESSES[swapFrom];
+      const tokenOut = TOKEN_ADDRESSES[swapFrom === "USDC" ? "EURC" : "USDC"];
+      const amountIn = parseUnits(swapAmount, 6);
+      const amounts = await arcSwapPublicClient.readContract({ address: ARC_V2_ROUTER, abi: swapRouterAbi, functionName: "getAmountsOut", args: [amountIn, [tokenIn, tokenOut]] });
+      const quotedOut = amounts[amounts.length - 1];
+      if (!quotedOut || quotedOut <= 0n) throw new Error("No usable liquidity is available for this swap.");
+      const amountOutMin = quotedOut * 995n / 1000n;
+      const walletClient = createWalletClient({ account, chain: arcSwapChain, transport: custom(provider as never) });
+      const allowance = await arcSwapPublicClient.readContract({ address: tokenIn, abi: swapTokenAbi, functionName: "allowance", args: [account, ARC_V2_ROUTER] });
+      if (allowance < amountIn) {
+        setSwapStatus("Approve token spending in your wallet…");
+        const approveHash = await walletClient.writeContract({ address: tokenIn, abi: swapTokenAbi, functionName: "approve", args: [ARC_V2_ROUTER, amountIn], gas: 100000n });
+        const approveReceipt = await arcSwapPublicClient.waitForTransactionReceipt({ hash: approveHash });
+        if (approveReceipt.status !== "success") throw new Error("Token approval failed on Arc Testnet. No swap was submitted.");
+      }
+      setSwapStatus("Review and confirm the swap in your wallet…");
+      const txHash = await walletClient.writeContract({
+        address: ARC_V2_ROUTER, abi: swapRouterAbi, functionName: "swapExactTokensForTokens",
+        args: [amountIn, amountOutMin, [tokenIn, tokenOut], account, BigInt(Math.floor(Date.now() / 1000) + 1200)],
+        gas: 250000n,
       });
-      const outcome = result as { txHash?: string; explorerUrl?: string; amountOut?: string };
-      setSwapStatus(outcome.explorerUrl ? `Swap submitted: ${outcome.explorerUrl}` : `Swap completed. Transaction: ${outcome.txHash ?? "confirmed by App Kit"}`);
-      if (outcome.txHash) recordTransaction({ action: "Swap", asset: `${swapFrom} → ${swapFrom === "USDC" ? "EURC" : "USDC"}`, amount: swapAmount, txHash: outcome.txHash, explorerUrl: outcome.explorerUrl ?? `https://explorer.testnet.arc.io/tx/${outcome.txHash}` });
+      setSwapStatus("Swap submitted. Waiting for Arc Testnet confirmation…");
+      const receipt = await arcSwapPublicClient.waitForTransactionReceipt({ hash: txHash });
+      if (receipt.status !== "success") throw new Error(`Swap transaction reverted. View it on Arc Explorer: https://explorer.testnet.arc.io/tx/${txHash}`);
+      const explorerUrl = `https://explorer.testnet.arc.io/tx/${txHash}`;
+      setSwapStatus(`Swap confirmed: ${explorerUrl}`);
+      recordTransaction({ action: "Swap", asset: `${swapFrom} → ${swapFrom === "USDC" ? "EURC" : "USDC"}`, amount: swapAmount, txHash, explorerUrl });
       setSwapQuote(null);
       await refreshWalletBalances(walletAddress);
     } catch (error) {
-      setSwapStatus(error instanceof Error ? error.message : "Swap failed. Check testnet liquidity and try a smaller amount.");
+      setSwapStatus(error instanceof Error ? error.message : "Swap failed. Check Arc Testnet liquidity and retry.");
     } finally { setSwapBusy(false); }
   };
-
 
   const readUltimaContractState = async (address = walletAddress) => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
