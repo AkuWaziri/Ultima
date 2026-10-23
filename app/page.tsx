@@ -182,19 +182,29 @@ export default function Home() {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) return;
     setBalancesLoading(true);
-    try {
-      const readTokenBalance = async (token: string) => {
-        const data = "0x70a08231" + address.toLowerCase().replace("0x", "").padStart(64, "0");
-        const rpcProvider = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
-        const raw = await rpcProvider.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }) as string;
-        return (Number(BigInt(raw || "0x0")) / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
-      };
-      const [usdc, eurc] = await Promise.all([readTokenBalance(TOKEN_ADDRESSES.USDC), readTokenBalance(TOKEN_ADDRESSES.EURC)]);
-      setUsdcBalance(usdc);
-      setEurcBalance(eurc);
-    } catch {
-      setNotice("Could not read token balances. Check your Arc Testnet connection and retry.");
-    } finally { setBalancesLoading(false); }
+    const rpcProvider = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+    const readTokenBalance = async (token: string) => {
+      const data = "0x70a08231" + address.toLowerCase().replace("0x", "").padStart(64, "0");
+      const raw = await rpcProvider.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }) as string;
+      if (!raw || !/^0x[0-9a-fA-F]+$/.test(raw)) throw new Error("The network returned an invalid balance response.");
+      return (Number(BigInt(raw)) / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+    };
+    const [usdcResult, eurcResult] = await Promise.allSettled([
+      readTokenBalance(TOKEN_ADDRESSES.USDC),
+      readTokenBalance(TOKEN_ADDRESSES.EURC),
+    ]);
+    if (usdcResult.status === "fulfilled") setUsdcBalance(usdcResult.value);
+    if (eurcResult.status === "fulfilled") setEurcBalance(eurcResult.value);
+    const failedAssets = [
+      ...(usdcResult.status === "rejected" ? ["USDC"] : []),
+      ...(eurcResult.status === "rejected" ? ["EURC"] : []),
+    ];
+    if (failedAssets.length) {
+      setNotice(`Could not read ${failedAssets.join(" and ")} balance from Arc Testnet. Confirm the wallet network, then retry.`);
+    } else {
+      setNotice("");
+    }
+    setBalancesLoading(false);
   }, []);
 
   const connectWallet = async () => {
