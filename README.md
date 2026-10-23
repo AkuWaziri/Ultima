@@ -8,9 +8,9 @@ Ultima is a stablecoin strategy and position-management workspace for Arc. It co
 - Circle Earn Kit integration for discovering live Arc Testnet vault metadata and using supported Earn Kit operations.
 - Wallet balance and position refresh flows.
 - Strategy analysis API backed by Groq when `GROQ_API_KEY` is configured.
-- `UltimaVault` Solidity contract source for per-user USDC custody/accounting, deposits, withdrawals, owner-controlled deposit pause, and events.
-- Initial frontend wiring for direct `UltimaVault` reads, USDC approval, deposit, withdrawal, receipt polling, and Arc Testnet explorer links. This flow activates only when `NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS` points to a valid deployed contract.
-- Foundry tests for deposit/withdrawal accounting, access control, and pause behavior.
+- `UltimaVault` Solidity contract source for per-user USDC and EURC custody/accounting, with independent balances, deposits, withdrawals, owner-controlled deposit pause, and events.
+- Frontend wiring for direct `UltimaVault` reads, token-specific USDC/EURC approvals, deposits, withdrawals, receipt polling, and Arc Testnet explorer links. This flow activates only when `NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS` points to a compatible deployed two-token contract.
+- Foundry tests for independent USDC/EURC accounting, deposit/withdrawal, unsupported-token rejection, access control, and pause behavior.
 - GitHub Actions CI for frontend lint/build and Solidity tests.
 
 **Important:** The `UltimaVault` source has not yet been verified by a successful test run or security review, and no deployment address is configured by default. The app's direct contract panel remains inactive until `NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS` is configured with the actual Arc Testnet deployment address. The existing Circle Earn Kit flow interacts with selected external vaults; it is separate from UltimaVault.
@@ -56,7 +56,7 @@ The test token is a local mock and must never be used as a production token.
 ## Before Mainnet
 
 1. Pass frontend lint/build and all contract tests.
-2. Independently review contract security and verify the actual USDC address.
+2. Independently review contract security and verify the actual USDC and EURC addresses.
 3. Test contract integration on Arc Testnet using a funded test wallet.
 4. Set `NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS` to the actual Arc Testnet deployment address and redeploy the app.
 5. Get explicit user approval before any Mainnet deployment or real-fund transaction.
@@ -65,7 +65,7 @@ The test token is a local mock and must never be used as a production token.
 
 ## Current limitations
 
-- The `UltimaVault` frontend flow is wired but remains inactive until the contract is deployed and `NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS` is configured.
+- The two-token `UltimaVault` frontend flow is wired but remains inactive until the compatible contract is deployed with verified USDC and EURC token addresses and `NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS` is configured.
 - Circle Earn Kit vault availability and end-to-end deposit/withdraw flows still need funded-wallet verification.
 - Activity history currently includes browser-local records for actions made on this device; it is not a complete indexed on-chain history.
 - Notification preferences are saved locally and do not yet send email or Telegram notifications.
