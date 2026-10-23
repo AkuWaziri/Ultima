@@ -304,8 +304,12 @@ export default function Home() {
         tokenOut: swapFrom === "USDC" ? "EURC" : "USDC",
         amountIn: swapAmount,
       });
-      const amountOut = result.estimatedOutput.amount;
-      setSwapQuote({ amountOut, effectiveRate: (Number(amountOut) / Number(swapAmount)).toFixed(6) });
+      const amountOut = Number(result.estimatedOutput.amount);
+      if (!Number.isFinite(amountOut) || amountOut <= 0) throw new Error("No valid live quote was returned for this swap direction.");
+      const outputAsset = swapFrom === "USDC" ? "EURC" : "USDC";
+      const formattedOutput = amountOut.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6, useGrouping: false });
+      setSwapQuote({ amountOut: formattedOutput, effectiveRate: (amountOut / Number(swapAmount)).toFixed(6) });
+      setSwapStatus(`Quote ready: ${swapAmount} ${swapFrom} → ${formattedOutput} ${outputAsset}.`);
     } catch (error) {
       setSwapStatus(error instanceof Error ? error.message : "A live quote is unavailable. Try a smaller amount or retry later.");
     } finally { setSwapBusy(false); }
@@ -702,10 +706,10 @@ export default function Home() {
                       <button type="button" className="swap-token-select" aria-label={`Pay with ${swapFrom}`}><span className={`swap-coin ${swapFrom.toLowerCase()}`}>{swapFrom === "USDC" ? "$" : "€"}</span>{swapFrom}<ChevronDown size={15} /></button>
                     </div>
                   </div>
-                  <button type="button" className="swap-direction" onClick={() => { setSwapFrom((current) => current === "USDC" ? "EURC" : "USDC"); setSwapQuote(null); }} aria-label="Switch swap direction"><ArrowDownUp size={18} /></button>
+                  <button type="button" className="swap-direction" onClick={() => { setSwapFrom((current) => current === "USDC" ? "EURC" : "USDC"); setSwapQuote(null); setSwapStatus(""); }} aria-label="Switch swap direction"><ArrowDownUp size={18} /></button>
                   <div className="swap-token-box swap-receive">
-                    <div className="swap-token-label"><span>You receive</span><span>Estimated amount</span></div>
-                    <div className="swap-token-row"><div className="swap-estimate"> {swapQuote ? swapQuote.amountOut : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
+                    <div className="swap-token-label"><span>You receive · {swapFrom === "USDC" ? "EURC" : "USDC"}</span><span>{swapQuote ? "Live estimate" : "Estimated amount"}</span></div>
+                    <div className="swap-token-row"><div className="swap-estimate" aria-live="polite">{swapQuote ? swapQuote.amountOut : "0.00"}</div><div className="swap-token-select static"><span className={`swap-coin ${(swapFrom === "USDC" ? "eurc" : "usdc")}`}>{swapFrom === "USDC" ? "€" : "$"}</span>{swapFrom === "USDC" ? "EURC" : "USDC"}</div></div>
                   </div>
                   <div className="swap-info-list">
                     <div><span>Network</span><strong>Arc Testnet</strong></div>
