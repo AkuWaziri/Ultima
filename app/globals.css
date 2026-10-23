@@ -1102,3 +1102,6 @@ button:focus-visible,input:focus-visible{outline-color:#a98aff}
 .swap-submit:hover:not(:disabled){filter:brightness(1.06)}
 .live-earn-refresh{background:#f5f0ff;border-color:#cbb4ff;color:#6938e8}
 .vault-wallet-balance>button{background:#eee5ff;border-color:#d4c0ff;color:#6938e8}
+
+/* Make the Ultima U brand mark circular instead of rounded-square. */
+.brand-mark{border-radius:50%}
