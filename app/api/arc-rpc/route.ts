@@ -2,10 +2,22 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+const ALLOWED_METHODS = new Set([
+  "eth_chainId",
+  "eth_call",
+  "eth_getBalance",
+  "eth_getBlockByNumber",
+  "eth_getCode",
+  "eth_getTransactionCount",
+  "eth_estimateGas",
+  "eth_gasPrice",
+  "eth_maxPriorityFeePerGas",
+]);
+
 export async function POST(request: Request) {
   try {
     const body = await request.json() as { method?: unknown; params?: unknown };
-    if (body.method !== "eth_chainId" && body.method !== "eth_call") {
+    if (typeof body.method !== "string" || !ALLOWED_METHODS.has(body.method)) {
       return NextResponse.json({ error: { message: "RPC method is not allowed." } }, { status: 400 });
     }
     if (!Array.isArray(body.params)) {
