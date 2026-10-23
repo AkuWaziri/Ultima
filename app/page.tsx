@@ -465,13 +465,50 @@ export default function Home() {
     }
   };
 
-  const createEarnAdapter = async (provider: EthereumProvider) => createViemAdapterFromProvider({
-    provider,
-    getPublicClient: ({ chain }) => createPublicClient({
-      chain,
-      transport: http("/api/arc-rpc"),
-    }),
-  });
+  const createEarnAdapter = async (provider: EthereumProvider) => {
+    const routedReadMethods = new Set([
+      "eth_chainId",
+      "eth_call",
+      "eth_getBalance",
+      "eth_getBlockByNumber",
+      "eth_getCode",
+      "eth_getTransactionCount",
+      "eth_estimateGas",
+      "eth_gasPrice",
+      "eth_maxPriorityFeePerGas",
+    ]);
+    const walletRpc = provider as unknown as {
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+    };
+    const routedProvider = {
+      request: async (args: { method: string; params?: unknown[] }) => {
+        if (!routedReadMethods.has(args.method)) {
+          return walletRpc.request(args);
+        }
+        const response = await fetch("/api/arc-rpc", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ method: args.method, params: args.params ?? [] }),
+        });
+        const payload = await response.json() as { result?: unknown; error?: { message?: string } };
+        if (!response.ok || payload.error) {
+          throw new Error(payload.error?.message || "Arc Testnet RPC request failed.");
+        }
+        if (payload.result === undefined) throw new Error("Arc Testnet RPC returned no result.");
+        return payload.result;
+      },
+      on: provider.on?.bind(provider),
+      removeListener: provider.removeListener?.bind(provider),
+    } as unknown as EthereumProvider;
+
+    return createViemAdapterFromProvider({
+      provider: routedProvider,
+      getPublicClient: ({ chain }) => createPublicClient({
+        chain,
+        transport: http("/api/arc-rpc"),
+      }),
+    });
+  };
 
   const runEarnAction = async (action: "quote" | "deposit" | "position" | "withdraw") => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
