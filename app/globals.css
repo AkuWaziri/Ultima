@@ -1082,3 +1082,23 @@ button:disabled{cursor:not-allowed;opacity:.58}
 .positions-toolbar{display:flex;align-items:center;gap:14px;margin:0 0 18px}.positions-toolbar>span{font-size:11px;color:#9293a8}.positions-toolbar .connect-button:disabled{opacity:.6;cursor:wait}@media(max-width:600px){.positions-toolbar{align-items:flex-start;flex-direction:column;gap:9px}}
 
 .earn-result-summary{display:grid;gap:8px;margin-top:13px;padding:13px;border:1px solid #ece8fb;border-radius:10px;background:#fcfbff}.earn-result-summary>strong{font-size:11px;color:#6252a8}.earn-result-summary>div{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;font-size:10px}.earn-result-summary>div span{color:#9293a8}.earn-result-summary>div strong{max-width:70%;overflow-wrap:anywhere;text-align:right;color:#555570}.earn-result-summary>a{display:inline-flex;align-items:center;gap:6px;color:#6c52da;font-size:10px;font-weight:700;text-decoration:none;margin-top:4px}
+
+
+/* Brighter, more vivid Ultima purple accents */
+:root{--purple:#8057f5;--purple-dark:#6938e8;--lavender:#eee5ff}
+.brand-mark{background:linear-gradient(140deg,#a27aff 0%,#7044f5 58%,#6036e8 100%);box-shadow:0 6px 16px rgba(112,68,245,.25)}
+.nav-item:hover{background:#f1eaff;color:#6938e8}
+.nav-item.active{background:linear-gradient(100deg,#eee5ff 0%,#e5d8ff 100%);color:#6938e8}
+.nav-count{background:#f3edff;border-color:#d9c8ff;color:#6938e8}
+.help-card{background:linear-gradient(140deg,#f0e7ff 0%,#faf7ff 100%);border-color:#e0d0ff}
+.help-icon{background:#dfd0ff;color:#6938e8}
+.avatar{background:#e5d8ff;color:#6938e8}
+.icon-button:hover{background:#eee5ff;color:#6938e8}
+button:focus-visible,input:focus-visible{outline-color:#a98aff}
+.swap-direction{background:#eee5ff!important;border-color:#d6c2ff!important;color:#6938e8!important}
+.swap-quote-button{background:#f5f0ff;border-color:#cbb4ff;color:#6938e8}
+.swap-quote-button:hover:not(:disabled){background:#e9ddff;border-color:#a98aff}
+.swap-submit{background:linear-gradient(100deg,#8057f5 0%,#6938e8 100%)!important;border-color:#6938e8!important;box-shadow:0 7px 18px rgba(105,56,232,.2)}
+.swap-submit:hover:not(:disabled){filter:brightness(1.06)}
+.live-earn-refresh{background:#f5f0ff;border-color:#cbb4ff;color:#6938e8}
+.vault-wallet-balance>button{background:#eee5ff;border-color:#d4c0ff;color:#6938e8}
