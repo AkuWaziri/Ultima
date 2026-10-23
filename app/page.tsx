@@ -187,10 +187,10 @@ export default function Home() {
       // Read balances from Arc's public RPC first so a wallet's custom RPC configuration
       // cannot prevent read-only balance checks. Fall back to the connected wallet RPC.
       try {
-        const response = await fetch("https://rpc.testnet.arc.io", {
+        const response = await fetch("/api/arc-rpc", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+          body: JSON.stringify({ method, params }),
         });
         if (!response.ok) throw new Error(`Arc RPC HTTP ${response.status}`);
         const payload = await response.json() as { result?: unknown; error?: { message?: string } };
