@@ -78,11 +78,12 @@ export default function Home() {
   const [yieldEarned, setYieldEarned] = useState<string | null>(null);
   const [walletPositions, setWalletPositions] = useState<WalletPosition[]>([]);
   const [positionsLoading, setPositionsLoading] = useState(false);
+  const [ultimaAsset, setUltimaAsset] = useState<"USDC" | "EURC">("USDC");
   const [ultimaAmount, setUltimaAmount] = useState("1");
   const [ultimaBusy, setUltimaBusy] = useState(false);
   const [ultimaStatus, setUltimaStatus] = useState("");
-  const [ultimaVaultBalance, setUltimaVaultBalance] = useState<string | null>(null);
-  const [ultimaTotalAssets, setUltimaTotalAssets] = useState<string | null>(null);
+  const [ultimaVaultBalances, setUltimaVaultBalances] = useState<Record<"USDC" | "EURC", string | null>>({ USDC: null, EURC: null });
+  const [ultimaTotalAssets, setUltimaTotalAssets] = useState<Record<"USDC" | "EURC", string | null>>({ USDC: null, EURC: null });
   const [ultimaTxHash, setUltimaTxHash] = useState("");
   const ultimaVaultAddress = process.env.NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS ?? "";
   const ultimaVaultConfigured = isAddress(ultimaVaultAddress);
@@ -290,15 +291,22 @@ export default function Home() {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider || !address || !ultimaVaultConfigured) return;
     const rpc = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
-    const call = async (to: string, data: string) => rpc.request({ method: "eth_call", params: [{ to, data }, "latest"] }) as Promise<string>;
-    const [balanceRaw, assetsRaw] = await Promise.all([
-      call(ultimaVaultAddress, encodeFunctionData({ abi: [{ type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "account", type: "address" }], outputs: [{ name: "", type: "uint256" }] }], functionName: "balanceOf", args: [address as `0x${string}`] })),
-      call(ultimaVaultAddress, encodeFunctionData({ abi: [{ type: "function", name: "totalAssets", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] }], functionName: "totalAssets" })),
-    ]);
-    const balance = decodeFunctionResult({ abi: [{ type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "account", type: "address" }], outputs: [{ name: "", type: "uint256" }] }], functionName: "balanceOf", data: balanceRaw as `0x${string}` }) as bigint;
-    const assets = decodeFunctionResult({ abi: [{ type: "function", name: "totalAssets", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] }], functionName: "totalAssets", data: assetsRaw as `0x${string}` }) as bigint;
-    setUltimaVaultBalance(formatUnits(balance, 6));
-    setUltimaTotalAssets(formatUnits(assets, 6));
+    const balanceAbi = [{ type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "asset", type: "address" }, { name: "account", type: "address" }], outputs: [{ name: "", type: "uint256" }] }] as const;
+    const totalAbi = [{ type: "function", name: "totalAssets", stateMutability: "view", inputs: [{ name: "asset", type: "address" }], outputs: [{ name: "", type: "uint256" }] }] as const;
+    const call = async (to: string, data: string) => rpc.request({ method: "eth_call", params: [{ to, data }, "latest"] }) as Promise<`0x${string}`>;
+    const assets = ["USDC", "EURC"] as const;
+    const results = await Promise.all(assets.map(async (symbol) => {
+      const token = TOKEN_ADDRESSES[symbol] as `0x${string}`;
+      const [balanceRaw, totalRaw] = await Promise.all([
+        call(ultimaVaultAddress, encodeFunctionData({ abi: balanceAbi, functionName: "balanceOf", args: [token, address as `0x${string}`] })),
+        call(ultimaVaultAddress, encodeFunctionData({ abi: totalAbi, functionName: "totalAssets", args: [token] })),
+      ]);
+      const balance = decodeFunctionResult({ abi: balanceAbi, functionName: "balanceOf", data: balanceRaw }) as bigint;
+      const total = decodeFunctionResult({ abi: totalAbi, functionName: "totalAssets", data: totalRaw }) as bigint;
+      return [symbol, formatUnits(balance, 6), formatUnits(total, 6)] as const;
+    }));
+    setUltimaVaultBalances(Object.fromEntries(results.map(([symbol, balance]) => [symbol, balance])) as Record<"USDC" | "EURC", string>);
+    setUltimaTotalAssets(Object.fromEntries(results.map(([symbol, , total]) => [symbol, total])) as Record<"USDC" | "EURC", string>);
   };
 
   const waitForUltimaReceipt = async (hash: string) => {
@@ -321,35 +329,37 @@ export default function Home() {
     if (!provider || !connected || !walletAddress) { setUltimaStatus("Connect your wallet first."); return; }
     if (walletChainId !== 5042002) { setUltimaStatus("Switch to Arc Testnet before interacting with UltimaVault."); return; }
     if (!ultimaVaultConfigured) { setUltimaStatus("UltimaVault is not configured yet. Deploy the contract to Arc Testnet, then set NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS in Vercel and redeploy."); return; }
-    if (!/^\d+(\.\d{1,6})?$/.test(ultimaAmount) || Number(ultimaAmount) <= 0) { setUltimaStatus("Enter a positive USDC amount with no more than 6 decimal places."); return; }
+    if (!/^\\d+(\\.\\d{1,6})?$/.test(ultimaAmount) || Number(ultimaAmount) <= 0) { setUltimaStatus(`Enter a positive ${ultimaAsset} amount with no more than 6 decimal places.`); return; }
     setUltimaBusy(true); setUltimaStatus(""); setUltimaTxHash("");
     const rpc = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
     try {
       const amount = parseUnits(ultimaAmount, 6);
+      const tokenAddress = TOKEN_ADDRESSES[ultimaAsset] as `0x${string}`;
       const vaultAbi = [
-        { type: "function", name: "deposit", stateMutability: "nonpayable", inputs: [{ name: "amount", type: "uint256" }], outputs: [] },
-        { type: "function", name: "withdraw", stateMutability: "nonpayable", inputs: [{ name: "amount", type: "uint256" }], outputs: [] },
+        { type: "function", name: "deposit", stateMutability: "nonpayable", inputs: [{ name: "asset", type: "address" }, { name: "amount", type: "uint256" }], outputs: [] },
+        { type: "function", name: "withdraw", stateMutability: "nonpayable", inputs: [{ name: "asset", type: "address" }, { name: "amount", type: "uint256" }], outputs: [] },
       ] as const;
       if (action === "deposit") {
-        const allowanceData = encodeFunctionData({ abi: [{ type: "function", name: "allowance", stateMutability: "view", inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }], outputs: [{ name: "", type: "uint256" }] }], functionName: "allowance", args: [walletAddress as `0x${string}`, ultimaVaultAddress as `0x${string}`] });
-        const allowanceRaw = await rpc.request({ method: "eth_call", params: [{ to: TOKEN_ADDRESSES.USDC, data: allowanceData }, "latest"] }) as `0x${string}`;
-        const allowance = decodeFunctionResult({ abi: [{ type: "function", name: "allowance", stateMutability: "view", inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }], outputs: [{ name: "", type: "uint256" }] }], functionName: "allowance", data: allowanceRaw }) as bigint;
+        const allowanceAbi = [{ type: "function", name: "allowance", stateMutability: "view", inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }], outputs: [{ name: "", type: "uint256" }] }] as const;
+        const allowanceData = encodeFunctionData({ abi: allowanceAbi, functionName: "allowance", args: [walletAddress as `0x${string}`, ultimaVaultAddress as `0x${string}`] });
+        const allowanceRaw = await rpc.request({ method: "eth_call", params: [{ to: tokenAddress, data: allowanceData }, "latest"] }) as `0x${string}`;
+        const allowance = decodeFunctionResult({ abi: allowanceAbi, functionName: "allowance", data: allowanceRaw }) as bigint;
         if (allowance < amount) {
-          setUltimaStatus("Approve USDC in your wallet, then confirm the approval transaction.");
+          setUltimaStatus(`Approve ${ultimaAsset} in your wallet, then confirm the approval transaction.`);
           const approveData = encodeFunctionData({ abi: [{ type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "value", type: "uint256" }], outputs: [{ name: "", type: "bool" }] }], functionName: "approve", args: [ultimaVaultAddress as `0x${string}`, amount] });
-          const approveHash = await rpc.request({ method: "eth_sendTransaction", params: [{ from: walletAddress, to: TOKEN_ADDRESSES.USDC, data: approveData }] }) as string;
+          const approveHash = await rpc.request({ method: "eth_sendTransaction", params: [{ from: walletAddress, to: tokenAddress, data: approveData }] }) as string;
           setUltimaTxHash(approveHash);
           await waitForUltimaReceipt(approveHash);
         }
       }
-      setUltimaStatus(action === "deposit" ? "Confirm the Ultima deposit in your wallet." : "Confirm the Ultima withdrawal in your wallet.");
-      const data = encodeFunctionData({ abi: vaultAbi, functionName: action, args: [amount] });
+      setUltimaStatus(action === "deposit" ? `Confirm the Ultima ${ultimaAsset} deposit in your wallet.` : `Confirm the Ultima ${ultimaAsset} withdrawal in your wallet.`);
+      const data = encodeFunctionData({ abi: vaultAbi, functionName: action, args: [tokenAddress, amount] });
       const hash = await rpc.request({ method: "eth_sendTransaction", params: [{ from: walletAddress, to: ultimaVaultAddress, data }] }) as string;
       setUltimaTxHash(hash);
       setUltimaStatus("Transaction submitted. Waiting for Arc Testnet confirmation…");
       await waitForUltimaReceipt(hash);
       await Promise.all([readUltimaContractState(), refreshWalletBalances(walletAddress)]);
-      setUltimaStatus(`Ultima ${action} confirmed. The contract balance has been refreshed.`);
+      setUltimaStatus(`Ultima ${ultimaAsset} ${action} confirmed. Contract balances have been refreshed.`);
     } catch (error) {
       setUltimaStatus(error instanceof Error ? error.message : "Transaction failed. Check your wallet and Arc Testnet connection.");
     } finally {
@@ -659,21 +669,31 @@ export default function Home() {
                 <div className="eyebrow"><ShieldCheck size={14} /> ULTIMA SMART CONTRACT</div>
                 <h2 style={{ margin: "10px 0 6px" }}>Test UltimaVault</h2>
                 <p style={{ margin: "0 0 18px", color: "var(--muted, #777)", lineHeight: 1.6 }}>
-                  This tests deposits and withdrawals through Ultima&apos;s own Arc Testnet contract. It is separate from external Circle Earn Kit vault positions and does not generate yield by itself.
+                  Test USDC and EURC deposits and withdrawals through Ultima&apos;s own Arc Testnet contract. Each stablecoin has separate balances. This custody contract does not generate yield by itself.
                 </p>
                 {!ultimaVaultConfigured ? (
-                  <div className="empty-state"><strong>Contract address not configured</strong><p>Deploy the current contract to Arc Testnet first, then set <code>NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS</code> in Vercel and redeploy the app.</p></div>
+                  <div className="empty-state"><strong>Contract address not configured</strong><p>Deploy the two-asset contract to Arc Testnet first, then set <code>NEXT_PUBLIC_ULTIMA_VAULT_ADDRESS</code> in Vercel and redeploy.</p></div>
                 ) : (
                   <>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 18 }}>
-                      <div className="metric-card"><span className="detail-label">Your Ultima balance</span><strong>{ultimaVaultBalance === null ? "Not loaded" : `${Number(ultimaVaultBalance).toLocaleString("en-US", { maximumFractionDigits: 6 })} USDC`}</strong></div>
-                      <div className="metric-card"><span className="detail-label">Total held by contract</span><strong>{ultimaTotalAssets === null ? "Not loaded" : `${Number(ultimaTotalAssets).toLocaleString("en-US", { maximumFractionDigits: 6 })} USDC`}</strong></div>
+                      {(["USDC", "EURC"] as const).map((symbol) => (
+                        <div className="metric-card" key={symbol}>
+                          <span className="detail-label">Your {symbol} balance</span>
+                          <strong>{ultimaVaultBalances[symbol] === null ? "Not loaded" : `${Number(ultimaVaultBalances[symbol]).toLocaleString("en-US", { maximumFractionDigits: 6 })} ${symbol}`}</strong>
+                          <span className="detail-label" style={{ marginTop: 8 }}>Total held</span>
+                          <strong>{ultimaTotalAssets[symbol] === null ? "Not loaded" : `${Number(ultimaTotalAssets[symbol]).toLocaleString("en-US", { maximumFractionDigits: 6 })} ${symbol}`}</strong>
+                        </div>
+                      ))}
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
-                      <input aria-label="USDC amount for UltimaVault" inputMode="decimal" value={ultimaAmount} onChange={(event) => setUltimaAmount(event.target.value)} placeholder="USDC amount" style={{ minWidth: 150, maxWidth: 220, padding: "12px 14px", borderRadius: 12, border: "1px solid var(--border, #ddd)", background: "var(--surface, white)", color: "inherit" }} />
-                      <button className="connect-button" onClick={() => void runUltimaContractAction("deposit")} disabled={!connected || walletChainId !== 5042002 || ultimaBusy}><ArrowDownLeft size={16} /> {ultimaBusy ? "Processing…" : "Deposit USDC"}</button>
-                      <button className="connect-button" onClick={() => void runUltimaContractAction("withdraw")} disabled={!connected || walletChainId !== 5042002 || ultimaBusy}><ArrowUpRight size={16} /> {ultimaBusy ? "Processing…" : "Withdraw USDC"}</button>
-                      <button className="explore-button" onClick={() => void readUltimaContractState().catch(() => setUltimaStatus("Could not read UltimaVault. Confirm the address and Arc Testnet deployment."))} disabled={!connected || walletChainId !== 5042002 || ultimaBusy}><Activity size={16} /> Refresh contract</button>
+                      <select aria-label="Stablecoin for UltimaVault" value={ultimaAsset} onChange={(event) => setUltimaAsset(event.target.value as "USDC" | "EURC")} style={{ padding: "12px 14px", borderRadius: 12, border: "1px solid var(--border, #ddd)", background: "var(--surface, white)", color: "inherit" }}>
+                        <option value="USDC">USDC</option>
+                        <option value="EURC">EURC</option>
+                      </select>
+                      <input aria-label={`${ultimaAsset} amount for UltimaVault`} inputMode="decimal" value={ultimaAmount} onChange={(event) => setUltimaAmount(event.target.value)} placeholder={`${ultimaAsset} amount`} style={{ minWidth: 150, maxWidth: 220, padding: "12px 14px", borderRadius: 12, border: "1px solid var(--border, #ddd)", background: "var(--surface, white)", color: "inherit" }} />
+                      <button className="connect-button" onClick={() => void runUltimaContractAction("deposit")} disabled={!connected || walletChainId !== 5042002 || ultimaBusy}><ArrowDownLeft size={16} /> {ultimaBusy ? "Processing…" : `Deposit ${ultimaAsset}`}</button>
+                      <button className="connect-button" onClick={() => void runUltimaContractAction("withdraw")} disabled={!connected || walletChainId !== 5042002 || ultimaBusy}><ArrowUpRight size={16} /> {ultimaBusy ? "Processing…" : `Withdraw ${ultimaAsset}`}</button>
+                      <button className="explore-button" onClick={() => void readUltimaContractState().catch(() => setUltimaStatus("Could not read UltimaVault. Confirm both token addresses and the Arc Testnet deployment."))} disabled={!connected || walletChainId !== 5042002 || ultimaBusy}><Activity size={16} /> Refresh contract</button>
                     </div>
                     {ultimaStatus && <p role="status" style={{ marginTop: 14, lineHeight: 1.6 }}>{ultimaStatus}</p>}
                     {ultimaTxHash && <p style={{ marginTop: 8 }}><a href={`https://explorer.testnet.arc.io/tx/${ultimaTxHash}`} target="_blank" rel="noreferrer">View latest transaction on Arc Explorer <ExternalLink size={14} /></a></p>}
