@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppKit } from "@circle-fin/app-kit";
 import type { EarnVaultInfo } from "@circle-fin/app-kit";
 import { createViemAdapterFromProvider } from "@circle-fin/adapter-viem-v2";
-import { decodeFunctionResult, encodeFunctionData, formatUnits, isAddress, parseUnits } from "viem";
+import { createPublicClient, decodeFunctionResult, encodeFunctionData, formatUnits, http, isAddress, parseUnits } from "viem";
 import type { CreateViemAdapterFromProviderParams } from "@circle-fin/adapter-viem-v2";
 import {
   Activity, ArrowDownLeft, ArrowDownRight, ArrowRight, ArrowUpRight, ArrowDownUp, Bell,
@@ -465,6 +465,14 @@ export default function Home() {
     }
   };
 
+  const createEarnAdapter = async (provider: EthereumProvider) => createViemAdapterFromProvider({
+    provider,
+    getPublicClient: ({ chain }) => createPublicClient({
+      chain,
+      transport: http("/api/arc-rpc"),
+    }),
+  });
+
   const runEarnAction = async (action: "quote" | "deposit" | "position" | "withdraw") => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider || !walletAddress || !connected || walletChainId !== 5042002) { setEarnStatus("Connect your wallet to Arc Testnet to use a testnet vault."); return; }
@@ -473,7 +481,7 @@ export default function Home() {
     if (action !== "position" && (!Number.isFinite(amount) || amount <= 0)) { setEarnStatus("Enter a valid amount greater than zero."); return; }
     setEarnBusy(true); setEarnStatus("");
     try {
-      const adapter = await createViemAdapterFromProvider({ provider });
+      const adapter = await createEarnAdapter(provider);
       let result: unknown;
       if (action === "quote") result = await appKit.earn.getDepositQuote({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress, amount: earnAmount });
       else if (action === "deposit") result = await appKit.earn.deposit({ from: { adapter, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress, amount: earnAmount });
@@ -493,7 +501,7 @@ export default function Home() {
         setEarnPosition(result);
         const tx = result as { txHash?: string; explorerUrl?: string };
         if (tx.txHash) recordTransaction({ action: action === "deposit" ? "Deposit" : "Withdraw", asset, amount: earnAmount, txHash: tx.txHash, explorerUrl: tx.explorerUrl ?? `https://explorer.testnet.arc.io/tx/${tx.txHash}` });
-        const adapterForPosition = await createViemAdapterFromProvider({ provider });
+        const adapterForPosition = await createEarnAdapter(provider);
         const updatedPosition = await appKit.earn.getPosition({ from: { adapter: adapterForPosition, chain: "Arc_Testnet" }, vaultAddress: selectedVaultAddress });
         setEarnPosition(updatedPosition);
         setYieldEarned((updatedPosition as { pnl?: { totalYieldEarned?: string } }).pnl?.totalYieldEarned ?? null);
