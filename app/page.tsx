@@ -314,7 +314,7 @@ export default function Home() {
         address: ARC_V2_ROUTER, abi: swapRouterAbi, functionName: "getAmountsOut", args: [amountIn, [tokenIn, tokenOut]],
       });
       const amountOut = amounts[amounts.length - 1];
-      if (!amountOut || amountOut <= 0n) throw new Error("No usable USDC/EURC liquidity is available for this amount.");
+      if (!amountOut || amountOut <= BigInt(0)) throw new Error("No usable USDC/EURC liquidity is available for this amount.");
       const formattedOutput = Number(formatUnits(amountOut, 6)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6, useGrouping: false });
       const rate = Number(formatUnits(amountOut, 6)) / Number(swapAmount);
       setSwapQuote({ amountOut: formattedOutput, effectiveRate: rate.toFixed(6) });
@@ -347,8 +347,8 @@ export default function Home() {
       const amountIn = parseUnits(swapAmount, 6);
       const amounts = await arcSwapPublicClient.readContract({ address: ARC_V2_ROUTER, abi: swapRouterAbi, functionName: "getAmountsOut", args: [amountIn, [tokenIn, tokenOut]] });
       const quotedOut = amounts[amounts.length - 1];
-      if (!quotedOut || quotedOut <= 0n) throw new Error("No usable liquidity is available for this swap.");
-      const amountOutMin = quotedOut * 995n / 1000n;
+      if (!quotedOut || quotedOut <= BigInt(0)) throw new Error("No usable liquidity is available for this swap.");
+      const amountOutMin = quotedOut * BigInt(995) / BigInt(1000);
       const walletClient = createWalletClient({ account, chain: arcSwapChain, transport: custom(provider as never) });
       const allowance = await arcSwapPublicClient.readContract({ address: tokenIn, abi: swapTokenAbi, functionName: "allowance", args: [account, ARC_V2_ROUTER] });
       if (allowance < amountIn) {
