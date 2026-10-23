@@ -182,29 +182,68 @@ export default function Home() {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) return;
     setBalancesLoading(true);
-    const rpcProvider = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
-    const readTokenBalance = async (token: string) => {
-      const data = "0x70a08231" + address.toLowerCase().replace("0x", "").padStart(64, "0");
-      const raw = await rpcProvider.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }) as string;
-      if (!raw || !/^0x[0-9a-fA-F]+$/.test(raw)) throw new Error("The network returned an invalid balance response.");
-      return (Number(BigInt(raw)) / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+    const walletRpc = provider as unknown as { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+    const rpcCall = async (method: string, params: unknown[]) => {
+      // Read balances from Arc's public RPC first so a wallet's custom RPC configuration
+      // cannot prevent read-only balance checks. Fall back to the connected wallet RPC.
+      try {
+        const response = await fetch("https://rpc.testnet.arc.io", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+        });
+        if (!response.ok) throw new Error(`Arc RPC HTTP ${response.status}`);
+        const payload = await response.json() as { result?: unknown; error?: { message?: string } };
+        if (payload.error) throw new Error(payload.error.message || "Arc RPC returned an error.");
+        if (payload.result === undefined) throw new Error("Arc RPC returned no result.");
+        return payload.result;
+      } catch (publicRpcError) {
+        try {
+          return await walletRpc.request({ method, params });
+        } catch (walletRpcError) {
+          const publicMessage = publicRpcError instanceof Error ? publicRpcError.message : "Public RPC request failed";
+          const walletMessage = walletRpcError instanceof Error ? walletRpcError.message : "Wallet RPC request failed";
+          throw new Error(`Public RPC: ${publicMessage}; wallet RPC: ${walletMessage}`);
+        }
+      }
     };
-    const [usdcResult, eurcResult] = await Promise.allSettled([
-      readTokenBalance(TOKEN_ADDRESSES.USDC),
-      readTokenBalance(TOKEN_ADDRESSES.EURC),
-    ]);
-    if (usdcResult.status === "fulfilled") setUsdcBalance(usdcResult.value);
-    if (eurcResult.status === "fulfilled") setEurcBalance(eurcResult.value);
-    const failedAssets = [
-      ...(usdcResult.status === "rejected" ? ["USDC"] : []),
-      ...(eurcResult.status === "rejected" ? ["EURC"] : []),
-    ];
-    if (failedAssets.length) {
-      setNotice(`Could not read ${failedAssets.join(" and ")} balance from Arc Testnet. Confirm the wallet network, then retry.`);
-    } else {
-      setNotice("");
+    try {
+      const chainHex = await rpcCall("eth_chainId", []) as string;
+      if (Number.parseInt(chainHex, 16) !== 5042002) {
+        setNotice("Your wallet is not connected to Arc Testnet. Switch networks and retry.");
+        return;
+      }
+      const readTokenBalance = async (token: string) => {
+        const data = "0x70a08231" + address.toLowerCase().replace("0x", "").padStart(64, "0");
+        const raw = await rpcCall("eth_call", [{ to: token, data }, "latest"]) as string;
+        if (!raw || !/^0x[0-9a-fA-F]+$/.test(raw)) throw new Error("The network returned an invalid balance response.");
+        return (Number(BigInt(raw)) / 1_000_000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+      };
+      const [usdcResult, eurcResult] = await Promise.allSettled([
+        readTokenBalance(TOKEN_ADDRESSES.USDC),
+        readTokenBalance(TOKEN_ADDRESSES.EURC),
+      ]);
+      if (usdcResult.status === "fulfilled") setUsdcBalance(usdcResult.value);
+      if (eurcResult.status === "fulfilled") setEurcBalance(eurcResult.value);
+      const failedAssets = [
+        ...(usdcResult.status === "rejected" ? ["USDC"] : []),
+        ...(eurcResult.status === "rejected" ? ["EURC"] : []),
+      ];
+      if (failedAssets.length === 2) {
+        const errors = [usdcResult, eurcResult]
+          .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+          .map((result) => result.reason instanceof Error ? result.reason.message : "RPC request failed");
+        setNotice(`Could not read token balances. ${errors[0]}`);
+      } else if (failedAssets.length) {
+        setNotice(`Could not read ${failedAssets[0]} balance. The other token balance loaded.`);
+      } else {
+        setNotice("");
+      }
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Could not read Arc Testnet balances. Retry in a moment.");
+    } finally {
+      setBalancesLoading(false);
     }
-    setBalancesLoading(false);
   }, []);
 
   const connectWallet = async () => {
