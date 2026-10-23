@@ -291,7 +291,7 @@ export default function Home() {
     return () => { provider.removeListener?.("accountsChanged", onAccountsChanged); provider.removeListener?.("chainChanged", onChainChanged); };
   }, [refreshWalletBalances, walletAddress]);
 
-  const getSwapQuote = async () => {
+  const getSwapQuote = useCallback(async () => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider || !walletAddress || !connected || walletChainId !== 5042002) { setSwapStatus("Connect your wallet to Arc Testnet first."); return; }
     if (!swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) { setSwapStatus("Enter a valid amount greater than zero."); return; }
@@ -313,7 +313,13 @@ export default function Home() {
     } catch (error) {
       setSwapStatus(error instanceof Error ? error.message : "A live quote is unavailable. Try a smaller amount or retry later.");
     } finally { setSwapBusy(false); }
-  };
+  }, [walletAddress, connected, walletChainId, swapAmount, swapFrom]);
+
+  useEffect(() => {
+    if (section !== "Swap" || !connected || walletChainId !== 5042002 || !swapAmount || !Number.isFinite(Number(swapAmount)) || Number(swapAmount) <= 0) return;
+    const timer = window.setTimeout(() => { void getSwapQuote(); }, 500);
+    return () => window.clearTimeout(timer);
+  }, [section, connected, walletChainId, swapAmount, swapFrom, getSwapQuote]);
 
   const runSwap = async () => {
     const provider = (window as Window & { ethereum?: EthereumProvider }).ethereum;
