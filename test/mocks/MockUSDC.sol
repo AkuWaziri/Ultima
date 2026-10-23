@@ -2,8 +2,8 @@
 pragma solidity ^0.8.24;
 
 contract MockUSDC {
-    string public constant name = "Mock USDC";
-    string public constant symbol = "USDC";
+    string public constant name = "Mock Stablecoin";
+    string public constant symbol = "MOCK";
     uint8 public constant decimals = 6;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
