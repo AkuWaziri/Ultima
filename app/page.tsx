@@ -353,7 +353,7 @@ export default function Home() {
       const allowance = await arcSwapPublicClient.readContract({ address: tokenIn, abi: swapTokenAbi, functionName: "allowance", args: [account, ARC_V2_ROUTER] });
       if (allowance < amountIn) {
         setSwapStatus("Approve token spending in your wallet…");
-        const approveHash = await walletClient.writeContract({ address: tokenIn, abi: swapTokenAbi, functionName: "approve", args: [ARC_V2_ROUTER, amountIn], gas: 100000n });
+        const approveHash = await walletClient.writeContract({ address: tokenIn, abi: swapTokenAbi, functionName: "approve", args: [ARC_V2_ROUTER, amountIn], gas: BigInt(100000) });
         const approveReceipt = await arcSwapPublicClient.waitForTransactionReceipt({ hash: approveHash });
         if (approveReceipt.status !== "success") throw new Error("Token approval failed on Arc Testnet. No swap was submitted.");
       }
@@ -361,7 +361,7 @@ export default function Home() {
       const txHash = await walletClient.writeContract({
         address: ARC_V2_ROUTER, abi: swapRouterAbi, functionName: "swapExactTokensForTokens",
         args: [amountIn, amountOutMin, [tokenIn, tokenOut], account, BigInt(Math.floor(Date.now() / 1000) + 1200)],
-        gas: 250000n,
+        gas: BigInt(250000),
       });
       setSwapStatus("Swap submitted. Waiting for Arc Testnet confirmation…");
       const receipt = await arcSwapPublicClient.waitForTransactionReceipt({ hash: txHash });
