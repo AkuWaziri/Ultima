@@ -299,7 +299,7 @@ export default function Home() {
     try {
       const adapter = await createViemAdapterFromProvider({ provider });
       const result = await appKit.estimateSwap({
-        from: { adapter, chain: "Arc_Testnet", address: walletAddress },
+        from: { adapter, chain: "Arc_Testnet" },
         tokenIn: swapFrom,
         tokenOut: swapFrom === "USDC" ? "EURC" : "USDC",
         amountIn: swapAmount,
